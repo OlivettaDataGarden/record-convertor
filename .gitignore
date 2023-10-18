@@ -131,3 +131,6 @@ dmypy.json
 
 # Compiled extensions
 *.c
+
+# Apple files
+.DS_store
