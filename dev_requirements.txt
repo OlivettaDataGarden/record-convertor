@@ -1,0 +1,9 @@
+# dev requirements
+wheel
+setuptools
+tox
+pytest
+pytest-cov
+
+#generic requirements
+click
