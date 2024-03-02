@@ -1,0 +1,12 @@
+Layer 1:
+
+module record_convertor
+Module to define RecordConvertor class.
+- RecordConvertor class serves as the Public entry to this package.
+- RecordConvertor class used to configure the RecordConvertor
+- RecordConvertor to invoke the actual conversion 
+
+Layer 2:
+
+module record_convertor/global
+Module to define global settings, dataclasses, protocol class and customer type
