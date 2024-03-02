@@ -14,41 +14,55 @@ __all__ = ["EvaluateConditions"]
 
 class EvaluateConditions:
     """
-    Class to evaluate conditions for a given value.j
+    Evaluates a set of conditions against a provided value.
 
-    args:
-        provided_condions (dict):
-            dict in form of
-                {condition: value for condition / None}
-            multiple conditions can be added to a single dict (as
-            long as they are different conditions)
+    This class allows for evaluating various conditions such as type checks, 
+    string operations, and date comparisons against a given value. It supports 
+    a flexible definition of conditions through a dictionary where each key 
+    represents a specific condition to be evaluated.
 
-        value (str, int, float):
-            the value that is used to evaluate the condition.
+    Parameters:
+        provided_conditions (Optional[ConditionsDict]): A dictionary of conditions
+            to be evaluated against the value. Each key in the dictionary is a string
+            that corresponds to a condition method within this class, and its value
+            is the expected condition value or parameter. Defaults to None, which 
+            results in an empty condition set.
+        value (Optional[ConditionValue]): The value to be evaluated against the 
+            provided conditions. Can be a string, integer, float, or None. Defaults
+            to None.
 
-    available conditions:
-        is_a_string:
-            Checks if value is of type string, No specific argument needed
-        is_not_a_string:
-            Checks if value is not of type string, No specific argument needed
-        is_null:
-            takes true ot false as argument and checks if fieldname is None
-            or is not None depending on the argument
-        date_not_today:
-            takes a date in string format (YYYY-MM-DD) and check that this date is not today. Input date is not checked if it has the right format.
-        str_length:
-            takes an int as condition input and checks if given value has
-            exactly that length.
-        field_does_not_exist:
-            checks if given field exists and returns False if it exists
-        field_does_exist:
-            checks if given field exists and returns True if it exists
-        is_null:
-            takes a boolean as argument and check the field value accordingly
-            for a None value
+    Methods:
+        evaluate() -> bool:
+            Evaluates all provided conditions against the value and returns True
+            if all conditions are met, otherwise False.
 
+    Supported Conditions:
+        - is_a_string: Checks if the value is a string.
+        - is_not_a_string: Checks if the value is not a string.
+        - is_null: Checks if the value is None, based on a boolean argument.
+        - date_not_today: Verifies that a date string (YYYY-MM-DD) does not represent today's date.
+        - str_length: Checks if the value's string representation has a specific length.
+        - field_does_not_exist: Returns True if the value is None (field does not exist).
+        - field_does_exist: Returns True if the value is not None (field exists).
+        - equals: Checks if the value equals a specified value.
+        - in_list: Verifies if the value exists within a provided list.
+        - does_not_equal: Checks if the value does not equal a specified value.
+        - contains: Determines if a substring exists within the value.
+        - does_not_contain: Determines if a substring does not exist within the value.
+
+    Raises:
+        NotImplementedError: If a provided condition does not match any supported condition method.
+        ValueError: If conditions 'contains' or 'does_not_contain' are provided None as input.
+
+    Example:
+        >>> conditions = {"is_a_string": True, "str_length": 5}
+        >>> evaluator = EvaluateConditions(provided_conditions=conditions, value="Hello")
+        >>> evaluator.evaluate()
+        True
+
+    Note:
+        The 'date_not_today' condition does not validate the format of the input date string.
     """
-
     def __init__(
         self,
         provided_conditions: Optional[ConditionsDict] = None,
