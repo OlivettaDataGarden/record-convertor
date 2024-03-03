@@ -1,5 +1,5 @@
 from record_convertor import RecordConvertor as RC
-from record_convertor.package_globals import ConvertRecordProtocol
+from record_convertor.package_settings import ConvertRecordProtocol
 
 
 class BasicConvertor:

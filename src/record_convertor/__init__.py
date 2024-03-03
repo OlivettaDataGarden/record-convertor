@@ -10,7 +10,7 @@ usage:
 >>>     RecordConvertor(rules: Rules).convert(record: dict)
 """
 
-from .package_globals import ConvertRecordProtocol
+from .package_settings import ConvertRecordProtocol
 
 
 class RecordConvertor:
