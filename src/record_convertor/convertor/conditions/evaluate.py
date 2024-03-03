@@ -5,7 +5,7 @@ Classes:
 """
 
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Union
 
 from .conditions_settings import ConditionsDict, ConditionValue
 
@@ -68,9 +68,8 @@ class EvaluateConditions:
         provided_conditions: Optional[ConditionsDict] = None,
         value: Optional[ConditionValue] = None,
     ):
-        self.provided_conditions: ConditionsDict = (
-            provided_conditions or ConditionsDict({})
-        )
+        self.provided_conditions: Union[ConditionsDict, dict] = \
+            provided_conditions or {}
         self.value = value
 
     def evaluate(self) -> bool:
