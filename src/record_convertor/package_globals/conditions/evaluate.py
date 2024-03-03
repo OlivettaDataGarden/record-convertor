@@ -7,27 +7,27 @@ Classes:
 from datetime import datetime
 from typing import Optional, Union
 
-from .conditions_settings import ConditionsDict, ConditionValue
+from .local_settings import ConditionsDict, ConditionValue
 
-__all__ = ["EvaluateConditions"]
+__all__ = ["EvaluateConditions", "ConditionsDict", "ConditionValue"]
 
 
 class EvaluateConditions:
     """
     Evaluates a set of conditions against a provided value.
 
-    This class allows for evaluating various conditions such as type checks, 
-    string operations, and date comparisons against a given value. It supports 
-    a flexible definition of conditions through a dictionary where each key 
+    This class allows for evaluating various conditions such as type checks,
+    string operations, and date comparisons against a given value. It supports
+    a flexible definition of conditions through a dictionary where each key
     represents a specific condition to be evaluated.
 
     Parameters:
         provided_conditions (Optional[ConditionsDict]): A dictionary of conditions
             to be evaluated against the value. Each key in the dictionary is a string
             that corresponds to a condition method within this class, and its value
-            is the expected condition value or parameter. Defaults to None, which 
+            is the expected condition value or parameter. Defaults to None, which
             results in an empty condition set.
-        value (Optional[ConditionValue]): The value to be evaluated against the 
+        value (Optional[ConditionValue]): The value to be evaluated against the
             provided conditions. Can be a string, integer, float, or None. Defaults
             to None.
 
@@ -63,13 +63,15 @@ class EvaluateConditions:
     Note:
         The 'date_not_today' condition does not validate the format of the input date string.
     """
+
     def __init__(
         self,
         provided_conditions: Optional[ConditionsDict] = None,
         value: Optional[ConditionValue] = None,
     ):
-        self.provided_conditions: Union[ConditionsDict, dict] = \
+        self.provided_conditions: Union[ConditionsDict, dict] = (
             provided_conditions or {}
+        )
         self.value = value
 
     def evaluate(self) -> bool:
