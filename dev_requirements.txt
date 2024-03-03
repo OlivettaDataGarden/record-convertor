@@ -3,3 +3,7 @@ build
 tox
 pre-commit
 pytest
+isort
+
+#package requirements
+jmespath
