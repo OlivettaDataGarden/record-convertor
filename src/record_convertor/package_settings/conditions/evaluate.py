@@ -7,7 +7,7 @@ Classes:
 from datetime import datetime
 from typing import Optional, Union
 
-from .local_settings import ConditionsDict, ConditionValue
+from .condition_settings import ConditionsDict, ConditionValue
 
 __all__ = ["EvaluateConditions", "ConditionsDict", "ConditionValue"]
 

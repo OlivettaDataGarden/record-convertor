@@ -1,7 +1,8 @@
 from datetime import datetime
 
 import pytest
-from record_convertor.convertor.conditions import EvaluateConditions
+
+from record_convertor.package_settings import EvaluateConditions
 
 
 @pytest.fixture
