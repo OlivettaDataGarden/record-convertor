@@ -1,2 +1,4 @@
 #package requirements
 jmespath
+phonenumbers
+unidecode
