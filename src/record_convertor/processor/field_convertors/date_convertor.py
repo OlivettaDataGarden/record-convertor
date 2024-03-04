@@ -29,7 +29,11 @@ from typing import Dict, Literal
 import jmespath
 from jmespath.exceptions import ParseError
 
-from ...package_settings import EvaluateConditions, RuleDict, RuleKeys
+from ...package_settings import (
+    EvaluateConditions,
+    FormatDateRuleDict,
+    FormatDateConvKeys,
+)
 
 __all__ = ["DateFieldConvertor"]
 
@@ -40,7 +44,7 @@ DATE_METHOD_NAME = Literal[
     "year_month_day",
     "year_month_day_time",
     "unix_dt_stamp",
-    "year_month_date"
+    "year_month_date",
 ]
 
 
@@ -62,7 +66,7 @@ class DateFieldConvertor:
 
     Parameters:
     - record (Dict): The record containing the date field to be converted. This argument expects a dictionary.
-    - conversion_rule (RuleDict): A dictionary specifying the conversion rules. The rules dictionary should include the following keys:
+    - conversion_rule (FormatDateRuleDict): A dictionary specifying the conversion rules. The rules dictionary should include the following keys:
         - 'fieldname': The name of the field to be converted.
         - 'format': The name of the input format.
         - 'conditions' (optional): Conditions that must be met for the conversion to proceed. If not provided, the conversion is assumed to be unconditional.
@@ -87,7 +91,7 @@ class DateFieldConvertor:
         To convert a date field within a record, instantiate the `DateFieldConvertor` with the target record and a rule dict outlining the conversion specifics. Then, call the `convert_date` method to apply the conversion.
     """
 
-    def __init__(self, record: Dict, conversion_rule: RuleDict):
+    def __init__(self, record: Dict, conversion_rule: FormatDateRuleDict):
         """
         Initializes the DateFieldConvertor with a record and a set of conversion rules.
 
@@ -98,8 +102,7 @@ class DateFieldConvertor:
 
         self.record = record
         self.conversion_rule = conversion_rule
-        self.date_field_key_name: str = self._get_date_field_key_name(
-            conversion_rule)
+        self.date_field_key_name: str = self._get_date_field_key_name(conversion_rule)
 
     @staticmethod
     def unix_dt_stamp(unix_dt_stamp: str) -> str:
@@ -146,16 +149,14 @@ class DateFieldConvertor:
         date_field_value = self._get_field()
 
         if date_field_value and self.all_conditions_true(date_field_value):
-            date_in_new_format = getattr(
-                self, date_formatter_method)(date_field_value)
+            date_in_new_format = getattr(self, date_formatter_method)(date_field_value)
             self.update_field_with_date(date_in_new_format)
 
         return self.record
 
     def all_conditions_true(self, date_field_value: str) -> bool:
         """Returns True if all provided conditions are satisfied."""
-        conditions = self.conversion_rule.get(
-            RuleKeys.CONDITION, False)
+        conditions = self.conversion_rule.get(FormatDateConvKeys.CONDITION, False)
         if not conditions:
             return True
 
@@ -196,14 +197,12 @@ class DateFieldConvertor:
             field_value.update({last_field: date_in_new_format})
 
     @staticmethod
-    def _get_date_field_key_name(rule: RuleDict) -> str:
+    def _get_date_field_key_name(rule: FormatDateRuleDict) -> str:
+        date_field_in_record = rule.get(FormatDateConvKeys.DATEFIELD)
+
         # initially used '__' as key seperator but migrating to using
         # `.` as seperator. This line to allow old conversion yaml files
         # not to fail
-        date_field_in_record = rule.get(RuleKeys.DATEFIELD)
-        if not date_field_in_record:
-            raise ValueError(f"No date field name defined in rule {rule}")
-
         date_field_in_record.replace("__", ".")
         return date_field_in_record
 
@@ -226,13 +225,12 @@ class DateFieldConvertor:
         return str(date_value_from_record) if date_value_from_record else ""
 
     @staticmethod
-    def _get_date_formatter_method_name(rule: RuleDict) -> DATE_METHOD_NAME:
-        format = rule.get(RuleKeys.FORMAT)
-        if not format:
-            raise ValueError(f"No date format defined in rule {rule}")
+    def _get_date_formatter_method_name(rule: FormatDateRuleDict) -> DATE_METHOD_NAME:
+        format = rule.get(FormatDateConvKeys.FORMAT)
         date_formatter_method_name = CONV_METHODS.get(format)
         if not date_formatter_method_name:
             raise NotImplementedError(
-                f"Format date converter for '{format}' is not implemented")
+                f"Format date converter for '{format}' is not implemented"
+            )
 
         return date_formatter_method_name

@@ -1,1 +1,1 @@
-from .command_processor import * # NOQA
+from .command_processor import *  # NOQA

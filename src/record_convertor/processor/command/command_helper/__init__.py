@@ -1,1 +1,1 @@
-from .geo_json import * # NOQA
+from .geo_json import *  # NOQA

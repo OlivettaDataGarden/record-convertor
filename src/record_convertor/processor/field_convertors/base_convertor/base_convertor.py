@@ -106,12 +106,14 @@ from typing import Optional, Union
 
 import jmespath
 import phonenumbers
-from .base_convertor_helpers import (DataFromHTMLSnippet,
-                                    iso3116_from_alpha_3_country_code,
-                                    normalize_string)
 from jmespath.exceptions import ParseError
 
-from ....package_settings import EvaluateConditions, RuleDict, RuleKeys
+from ....package_settings import EvaluateConditions, BaseRuleDict, BaseConvertorKeys
+from .base_convertor_helpers import (
+    DataFromHTMLSnippet,
+    iso3116_from_alpha_3_country_code,
+    normalize_string,
+)
 
 __all__ = ["RecordFieldConvertor"]
 
@@ -136,16 +138,16 @@ class RecordFieldConvertor:
             returns: record (dict) -> the converted record
     """
 
-    def __init__(self, record: dict, conversion_rule: RuleDict):
+    def __init__(self, record: dict, conversion_rule: BaseRuleDict):
         self.record = record
         self.conversion_rule = conversion_rule
-        self.field_name = conversion_rule.get(RuleKeys.FIELDNAME)
+        self.field_name = conversion_rule.get(BaseConvertorKeys.FIELDNAME)
         if not self.field_name:
             raise ValueError("Fieldname not provided in conversion rule")
         self.field_value = self._get_field(self.field_name)
 
-    def convert(self):
-        actions = self.conversion_rule[RuleKeys.ACTIONS] or {}
+    def convert(self) -> dict:
+        actions = self.conversion_rule[BaseConvertorKeys.ACTIONS] or {}
         if self.all_conditions_true():
             for action_dict in actions:
                 [[action, action_value]] = action_dict.items()
@@ -362,7 +364,7 @@ class RecordFieldConvertor:
 
     def all_conditions_true(self) -> bool:
         """Returns True if all provided conditions are satisfied"""
-        if conditions := self.conversion_rule.get(RuleKeys.CONDITION):
+        if conditions := self.conversion_rule.get(BaseConvertorKeys.CONDITION):
             return EvaluateConditions(
                 provided_conditions=conditions, value=self.field_value
             ).evaluate()
@@ -442,7 +444,7 @@ class RecordFieldConvertor:
         if field_value and isinstance(field_value, dict):
             return field_value.pop(last_field, None)
 
-    def _get_field(self, key, rec=None):
+    def _get_field(self, key: str, rec: Optional[dict] = None):
         """
         returns a value from a nested field in the record.
         nested field names should be seperated by `__`

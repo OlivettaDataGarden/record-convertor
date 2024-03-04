@@ -2,20 +2,33 @@ from typing import Dict, Optional, TypedDict, Union
 
 from .conditions import ConditionsDict
 
-__all__ = ["RuleDict", "RulesDict", "RuleKeys"]
+__all__ = [
+    "BaseRuleDict",
+    "RulesDict",
+    "BaseConvertorKeys",
+    "FormatDateRuleDict",
+    "FormatDateConvKeys",
+]
 
 
-class RuleKeys:
+class GenericRuleKeys:
+    # generic fields
     CONDITION = "condition"
-    FORMAT = "format"
+
+
+class BaseConvertorKeys(GenericRuleKeys):
     FIELDNAME = "fieldname"
-    DATEFIELD = "date_field"
     ACTIONS = "actions"
     ACTIONTYPE = "action_type"
     ACTIONVALUE = "action_value"
 
 
-class RuleDict(TypedDict):
+class FormatDateConvKeys(GenericRuleKeys):
+    FORMAT = "format"
+    DATEFIELD = "date_field"
+
+
+class BaseRuleDict(TypedDict):
     condition: Optional[ConditionsDict]
     format: Optional[str]  # used by date convertor
     fieldname: Optional[str]
@@ -24,4 +37,10 @@ class RuleDict(TypedDict):
     action_value: Union[str, dict]  # tbd if these are still needed
 
 
-RulesDict = Dict[str, RuleDict]
+class FormatDateRuleDict(TypedDict):
+    condition: Optional[ConditionsDict]
+    format: str
+    date_field: str
+
+
+RulesDict = Dict[str, BaseRuleDict]
