@@ -5,8 +5,6 @@ from copy import deepcopy
 from datetime import date, datetime, timedelta
 
 import pytest
-
-from record_convertor.processor.field_convertors import RecordFieldConvertor
 from data.test_data_field_convertor import (
     BASE_PARAMS, BASE_PARAMS_SELECT_FROM_LIST, BASE_PARAMS_WITH_CONDITION,
     PARAMS_ADD_DATA_FROM_DICT, PARAMS_ADD_KEY_VALUE_FROM_FIELD,
@@ -24,6 +22,8 @@ from data.test_data_field_convertor import (
     PARAMS_SELECT_FROM_LIST_WITH_NO_LIST,
     PARAMS_SELECT_FROM_LIST_WITH_NON_DICT_ENTRIES, PARAMS_STR_TO_DICT,
     PARAMS_TO_LOWER_STR, PARAMS_TO_STR, PARAMS_TO_UPPER_STR)
+
+from record_convertor.processor.field_convertors import RecordFieldConvertor
 
 
 def convertor(**params):
