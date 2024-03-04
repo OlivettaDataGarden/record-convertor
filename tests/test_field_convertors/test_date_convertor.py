@@ -1,11 +1,15 @@
 """Module to test the field converter class from the record convertor module
 
 """
+from data.test_data_date_convertor import (BASE_PARAMS, BASE_PARAMS_DOTTED,
+                                           BASE_PARAMS_NESTED_DATE_FIELD,
+                                           BASE_PARAMS_NONE_DATE,
+                                           BASE_PARAMS_UNIX_DT_STAMP,
+                                           BASE_PARAMS_YYYY_MM_DD,
+                                           BASE_PARAMS_YYYY_MM_DD_UNDERSCORE,
+                                           BASE_PARAMS_YYYY_MM_DD_Time)
+
 from record_convertor.processor.field_convertors import DateFieldConvertor
-from data.test_data_date_convertor import (
-    BASE_PARAMS, BASE_PARAMS_DOTTED, BASE_PARAMS_NESTED_DATE_FIELD,
-    BASE_PARAMS_NONE_DATE, BASE_PARAMS_UNIX_DT_STAMP, BASE_PARAMS_YYYY_MM_DD,
-    BASE_PARAMS_YYYY_MM_DD_Time, BASE_PARAMS_YYYY_MM_DD_UNDERSCORE)
 
 
 def date_convertor(params):
