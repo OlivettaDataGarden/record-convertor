@@ -63,6 +63,7 @@ def test_record_convert_does_not_set_keys_to_lower_case_by_default():
     record_convertor.convert(record=test_record)
     assert record_convertor._record == {"KEY1": 1}
 
+
 ##################################
 #### This skip record section ####
 ##################################

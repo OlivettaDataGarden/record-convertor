@@ -108,11 +108,12 @@ import jmespath
 import phonenumbers
 from jmespath.exceptions import ParseError
 
-from ....package_settings import (BaseConvertorKeys, BaseRuleDict,
-                                  EvaluateConditions)
-from .base_convertor_helpers import (DataFromHTMLSnippet,
-                                     iso3116_from_alpha_3_country_code,
-                                     normalize_string)
+from ....package_settings import BaseConvertorKeys, BaseRuleDict, EvaluateConditions
+from .base_convertor_helpers import (
+    DataFromHTMLSnippet,
+    iso3116_from_alpha_3_country_code,
+    normalize_string,
+)
 
 __all__ = ["RecordFieldConvertor"]
 

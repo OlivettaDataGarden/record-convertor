@@ -4,6 +4,7 @@ Module to provide method to process, clean etc strings.
 Methods
     - normalize_string
 """
+
 import unidecode
 
 __all__ = ["normalize_string"]
