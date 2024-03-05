@@ -1,47 +1,54 @@
-"""
-Help module to provide dict converter methods
-
-Methods:
-    keys_in_lower_case
-        - Returns input dict as dict with all keys including nested keys in
-          lower case
-"""
-
-from typing import Dict, List, Union
-
-__all__ = ["keys_in_lower_case", "dict_without_non_values"]
+from typing import Dict, List, Any
 
 
-def keys_in_lower_case(input_record: Union[Dict, List]) -> Union[Dict, List]:
+__all__ = ["list_in_lower_case", "keys_in_lower_case", "dict_without_non_values"]
+
+
+def list_in_lower_case(input_record: List[Any]) -> List[Any]:
     """
-    return input dict with all keys in lower case including nested keys
+    Return input dict or list with all keys in lower case including nested keys.
 
-    args:
-        input_record (dict or list):
-            dict of which the keys need to be put in lower case or a list
-            that needs to be processed item by item
+    Args:
+        input_record (Union[Dict[str, Any], List[Any]]): The dict of which the keys need
+        to be put in lower case or a list that needs to be processed item by item.
 
-    returns
-        dict
+    Returns:
+        Union[Dict[str, Any], List[Any]]: A new dict or list with all keys in lower case.
     """
-    if isinstance(input_record, dict):
-        result = {}
-        for key, value in input_record.items():
-            if isinstance(value, (list, dict)):
-                result[key.lower()] = keys_in_lower_case(value)
-            else:
-                result[key.lower()] = value
-
-    if isinstance(input_record, list):
-        result = []
-        for value in input_record:
-            if isinstance(value, (list, dict)):
-                result.append(keys_in_lower_case(value))
-            else:
-                result.append(value)
+    result: List[Any] = []
+    for item in input_record:
+        if isinstance(item, list):
+            result.append(list_in_lower_case(item))
+        elif isinstance(item, dict):
+            result.append(keys_in_lower_case(item))
+        else:
+            result.append(item)
 
     return result
 
 
-def dict_without_non_values(input_dict: Dict):
-    return {k: v for k, v in input_dict.items() if (v is not None)}
+def keys_in_lower_case(input_record: dict[str, Any]) -> dict[str, Any]:
+    """
+    Return input dict or list with all keys in lower case including nested keys.
+
+    Args:
+        input_record (Union[Dict[str, Any], List[Any]]): The dict of which the keys need
+        to be put in lower case or a list that needs to be processed item by item.
+
+    Returns:
+        Union[Dict[str, Any], List[Any]]: A new dict or list with all keys in lower case.
+    """
+    dict_result: Dict[str, Any] = {}
+    for key, value in input_record.items():
+        if isinstance(value, list):
+            dict_result[key.lower()] = list_in_lower_case(value)
+        elif isinstance(value, dict):
+            dict_result[key.lower()] = keys_in_lower_case(value)
+        else:
+            dict_result[key.lower()] = value
+    return dict_result
+
+
+def dict_without_non_values(input_dict: Dict[str, Any]) -> Dict[str, Any]:
+    """Return a copy of the input dict with all None values removed."""
+    return {k: v for k, v in input_dict.items() if v is not None}
