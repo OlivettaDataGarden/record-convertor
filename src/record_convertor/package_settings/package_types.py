@@ -3,12 +3,20 @@ from typing import Dict, Optional, TypedDict, Union
 from .conditions import ConditionsDict
 
 __all__ = [
+    "RecConvKeys",
     "BaseRuleDict",
     "RulesDict",
     "BaseConvertorKeys",
     "FormatDateRuleDict",
     "FormatDateConvKeys",
+    "SkipConvKeys",
+    "SkipRuleDict",
 ]
+
+
+class RecConvKeys:
+    SKIP = "$skip"
+    CONVERT = "$convert"
 
 
 class GenericRuleKeys:
@@ -28,6 +36,10 @@ class FormatDateConvKeys(GenericRuleKeys):
     DATEFIELD = "date_field"
 
 
+class SkipConvKeys(GenericRuleKeys):
+    FIELDNAME = "fieldname"
+
+
 class BaseRuleDict(TypedDict):
     condition: Optional[ConditionsDict]
     format: Optional[str]  # used by date convertor
@@ -43,4 +55,9 @@ class FormatDateRuleDict(TypedDict):
     date_field: str
 
 
-RulesDict = Dict[str, BaseRuleDict]
+class SkipRuleDict(TypedDict):
+    condition: ConditionsDict
+    fieldname: str
+
+
+RulesDict = Dict[str, Union[BaseRuleDict, FormatDateRuleDict, SkipRuleDict]]
