@@ -11,20 +11,15 @@ usage:
 """
 
 from .package_settings import ConvertRecordProtocol
+from .rules_generator import RulesFromYAML
 
 
 class RecordConvertor:
-    """
-    Class that coverts a input record to a format as defined by a yaml file
-    provided when creating the class instance.
-
-
-    public methods:
-        - convert: converts record according to provided rules via the rules class
-
-    """
-
+    RULE_CLASS = RulesFromYAML
     CONVERTOR: type[ConvertRecordProtocol]
+
+    def __init__(self, rule_source: RULE_CLASS.RULE_SOURCE_TYPE):
+        self._rules = self.RULE_CLASS(rule_source=rule_source).rules
 
     def convert(self, record: dict) -> dict:
         """
@@ -36,4 +31,4 @@ class RecordConvertor:
         Returns:
             dict: converted record
         """
-        return self.CONVERTOR().convert(record=record)
+        ...

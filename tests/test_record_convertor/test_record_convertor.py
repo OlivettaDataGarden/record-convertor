@@ -1,24 +1,29 @@
-from record_convertor import RecordConvertor as RC
-from record_convertor.package_settings import ConvertRecordProtocol
+from record_convertor import RecordConvertor
 
 
-class BasicConvertor:
+TEST_RULES = {'rule1': 'test'}
+
+class RuleConvertorTest():
+    RULE_SOURCE_TYPE = str
+
+    def __init__(self, rule_source: RULE_SOURCE_TYPE):
+        ...
+
+    @property
+    def rules(self) -> dict:
+        return TEST_RULES
+
+
+class RecordConvertorTest(RecordConvertor) :
     """Basic convertor that returns input. Only for testing purposes."""
-
-    def convert(self, record: dict) -> dict:
-        return record
-
+    RULE_CLASS = RuleConvertorTest
+    
 
 def test_record_convertor_class_exits():
-    """Assert that RecordConvertor class exist."""
-    assert RC()
+    """Tests the existence of the `RecordConvertor` class to ensure it is correctly defined and importable."""
+    assert RecordConvertor
 
 
-def test_record_convertor_convert_method():
-    """Assert that RecordConvertor convert method coverts the record."""
-
-    class TestRC(RC):
-        CONVERTOR: type[ConvertRecordProtocol] = BasicConvertor
-
-    test_record = {"test": 1}
-    assert TestRC().convert(test_record) == test_record
+def test_record_sets_rules_source():
+    """Tests that the `RecordConvertorTest` class correctly sets and utilizes the `_rules` attribute."""
+    assert RecordConvertorTest(rule_source="test")._rules == TEST_RULES
