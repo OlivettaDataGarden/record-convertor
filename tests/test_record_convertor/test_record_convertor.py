@@ -1,6 +1,17 @@
-from record_convertor import RecordConvertor
+from record_convertor import RecordConvertor, EvaluateConditions
 
 TEST_RULES = {"rule1": "test"}
+SKIP_RULE = {"fieldname": "field1", "condition": {"does_not_equal": "test"}}
+
+
+class EveluateConditionsAlwaysToTrue(EvaluateConditions):
+    def evaluate(self) -> bool:
+        return True
+
+
+class EveluateConditionsAlwaysToFalse(EvaluateConditions):
+    def evaluate(self) -> bool:
+        return False
 
 
 class RuleConvertorTest:
@@ -51,3 +62,34 @@ def test_record_convert_does_not_set_keys_to_lower_case_by_default():
     test_record = {"KEY1": 1}
     record_convertor.convert(record=test_record)
     assert record_convertor._record == {"KEY1": 1}
+
+
+##################################
+#### This skip record section ####
+##################################
+def test_skip_method_returns_false_if_skip_not_in_key():
+    class RecordConvertorTest(RecordConvertor):
+        RULE_CLASS = EmptyRuleConvertorTest
+
+    record_convertor = RecordConvertorTest(rule_source="test")
+    assert not record_convertor._skip_this_record(rule=("$NOT_SKIP", SKIP_RULE))
+
+
+def test_skip_method_returns_true_if_skip_in_key_and_confition_is_true():
+    class RecordConvertorTest(RecordConvertor):
+        RULE_CLASS = EmptyRuleConvertorTest
+        EVALUATE_CLASS = EveluateConditionsAlwaysToTrue
+        _record = {}
+
+    record_convertor = RecordConvertorTest(rule_source="test")
+    assert record_convertor._skip_this_record(rule=("$SKIP", SKIP_RULE))
+
+
+def test_skip_method_returns_false_if_skip_in_key_and_confition_is_false():
+    class RecordConvertorTest(RecordConvertor):
+        RULE_CLASS = EmptyRuleConvertorTest
+        EVALUATE_CLASS = EveluateConditionsAlwaysToFalse
+        _record = {}
+
+    record_convertor = RecordConvertorTest(rule_source="test")
+    assert not record_convertor._skip_this_record(rule=("$SKIP", SKIP_RULE))

@@ -29,8 +29,11 @@ from typing import Dict, Literal
 import jmespath
 from jmespath.exceptions import ParseError
 
-from ...package_settings import (EvaluateConditions, FormatDateConvKeys,
-                                 FormatDateRuleDict)
+from ...package_settings import (
+    EvaluateConditions,
+    FormatDateConvKeys,
+    FormatDateRuleDict,
+)
 
 __all__ = ["DateFieldConvertor"]
 

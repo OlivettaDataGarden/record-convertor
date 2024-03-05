@@ -5,7 +5,10 @@ methods:
     - lat_lon_to_geojson_point
 """
 
-def lat_lon_to_geojson_point(latitude: float, longitude: float, operator=None, digits=5):
+
+def lat_lon_to_geojson_point(
+    latitude: float, longitude: float, operator=None, digits=5
+):
     """
     converts latt and long to a geojson dict.
 
@@ -38,10 +41,7 @@ def lat_lon_to_geojson_point(latitude: float, longitude: float, operator=None, d
 
     return {
         "type": "Point",
-        "coordinates": [
-            round(float(lon), digits),
-            round(float(lat), digits)
-        ]
+        "coordinates": [round(float(lon), digits), round(float(lat), digits)],
     }
 
 
@@ -55,6 +55,6 @@ def _operate(value: float, operator: str) -> float:
             string indiciting operation to be done. Possible values
                 - divide_XYZ -> divide value by XYZ
     """
-    if operator.split('_')[0] == 'divide':
-        return float(value)/(int(operator.split('_')[1]))
-    raise ValueError(f'Unkown operator {operator}')
+    if operator.split("_")[0] == "divide":
+        return float(value) / (int(operator.split("_")[1]))
+    raise ValueError(f"Unkown operator {operator}")

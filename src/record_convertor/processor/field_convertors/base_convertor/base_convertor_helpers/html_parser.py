@@ -7,7 +7,7 @@ __all__ = ["DataFromHTMLSnippet"]
 class DataFromHTMLSnippet(HTMLParser):
     """Class to turn a html fragmet into a list of data items.
 
-    Usage:    
+    Usage:
     >>> parser = MyHTMLParser()
     >>> parser.to_list(html_fragmemt)
     [<list with data objects from html_fragment>]
