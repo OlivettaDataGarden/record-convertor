@@ -41,7 +41,8 @@ class RecordConvertor:
         field_convertor: Optional[type[FieldConvertorProtocol]] = None,
     ):
         self._rules = self.RULE_CLASS(rule_source=rule_source).rules
-        self._field_convertor = field_convertor or self.DEFAULT_FIELD_CONVERTOR_CLASS
+        field_convertor_class = field_convertor or self.DEFAULT_FIELD_CONVERTOR_CLASS
+        self._field_convertor = field_convertor_class()
 
     def convert(self, record: dict) -> dict:
         """
@@ -53,12 +54,38 @@ class RecordConvertor:
         Returns:
             dict: converted record
         """
+
         self._record = keys_in_lower_case(record) if self.KEYS_IN_LOWER_CASE else record
         for rule in self._rules.items():
+            # check if the rule determines that the given record can be skipped
             if self._skip_this_record(rule):
                 return self.DEFAULT_VALUE
 
+            # check if the rule triggers a field conversion in the input record
+            if self._convert_field_rule(rule):
+                _, rule_dict = rule
+                self._record = self._field_convertor.convert_field(
+                    record=self._record, conversion_rule=rule_dict
+                )
+                continue
+
+            # check if the rule triggers a field date conversion in the input record
+            if self._format_date_rule(rule):
+                _, rule_dict = rule
+                self._record = self._field_convertor.convert_field(
+                    record=self._record, conversion_rule=rule_dict
+                )
+                continue
+
         return record
+
+    def _convert_field_rule(self, rule: tuple) -> bool:
+        rule_key, _ = rule
+        return "$convert" in rule_key
+
+    def _format_date_rule(self, rule: tuple) -> bool:
+        rule_key, _ = rule
+        return "$format_date" in rule_key
 
     def _skip_this_record(self, rule: tuple) -> bool:
         rule_key, rule_value = rule
