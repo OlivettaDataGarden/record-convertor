@@ -102,7 +102,7 @@ Availale conversion
 
 import json
 from datetime import date, timedelta
-from typing import Optional, Union
+from typing import Optional, Union, Any
 
 import jmespath
 import phonenumbers
@@ -138,7 +138,9 @@ class BaseFieldConvertor:
             returns: record (dict) -> the converted record
     """
 
-    def __init__(self, record: dict, conversion_rule: BaseRuleDict):
+    def convert_field(
+        self, record: dict[str, Any], conversion_rule: BaseRuleDict
+    ) -> dict:
         self.record = record
         self.conversion_rule = conversion_rule
         self.field_name = conversion_rule.get(BaseConvertorKeys.FIELDNAME)
@@ -146,7 +148,6 @@ class BaseFieldConvertor:
             raise ValueError("Fieldname not provided in conversion rule")
         self.field_value = self._get_field(self.field_name)
 
-    def convert_field(self) -> dict:
         actions = self.conversion_rule[BaseConvertorKeys.ACTIONS] or {}
         if self.all_conditions_true():
             for action_dict in actions:
