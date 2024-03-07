@@ -34,7 +34,7 @@ def test_record_convertor_class_exits():
     assert RecordConvertor
 
 
-def test_record_sets_rules_source():
+def test_record_convertor_sets_rules_source():
     """Tests that the `RecordConvertorTest` class correctly sets and utilizes the `_rules` attribute."""
 
     class RecordConvertorTest(RecordConvertor):
@@ -42,6 +42,15 @@ def test_record_sets_rules_source():
 
     assert RecordConvertorTest(rule_source="test")._rules == TEST_RULES
 
+def test_record_convertor_sets_field_convertor():
+    """Tests that the `RecordConvertorTest` class correctly sets and utilizes the `_rules` attribute."""
+
+    class TestFieldConvertor(): ...
+    class RecordConvertorTest(RecordConvertor):
+        RULE_CLASS = RuleConvertorTest
+        DEFAULT_FIELD_CONVERTOR_CLASS: type = TestFieldConvertor
+
+    assert RecordConvertorTest(rule_source="test")._field_convertor == TestFieldConvertor
 
 ######################################################
 #### Test the set record keys to lower case logic ####

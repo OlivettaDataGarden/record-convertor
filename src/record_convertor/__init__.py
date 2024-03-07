@@ -16,25 +16,32 @@ import jmespath
 from jmespath.exceptions import ParseError
 
 from .package_settings import (
-    ConvertRecordProtocol,
     EvaluateConditions,
     keys_in_lower_case,
     RecConvKeys,
     SkipConvKeys,
     SkipRuleDict,
+    FieldConvertorProtocol,
 )
 from .rules_generator import RulesFromYAML
+
+from .field_convertors import BaseFieldConvertor
 
 
 class RecordConvertor:
     RULE_CLASS = RulesFromYAML
-    CONVERTOR: type[ConvertRecordProtocol]
     EVALUATE_CLASS = EvaluateConditions
     KEYS_IN_LOWER_CASE: bool = False
     DEFAULT_VALUE: dict = {}
+    DEFAULT_FIELD_CONVERTOR_CLASS: type[FieldConvertorProtocol] = BaseFieldConvertor
 
-    def __init__(self, rule_source: RULE_CLASS.RULE_SOURCE_TYPE):
+    def __init__(
+        self,
+        rule_source: RULE_CLASS.RULE_SOURCE_TYPE,
+        field_convertor: Optional[type[FieldConvertorProtocol]] = None,
+    ):
         self._rules = self.RULE_CLASS(rule_source=rule_source).rules
+        self._field_convertor = field_convertor or self.DEFAULT_FIELD_CONVERTOR_CLASS
 
     def convert(self, record: dict) -> dict:
         """

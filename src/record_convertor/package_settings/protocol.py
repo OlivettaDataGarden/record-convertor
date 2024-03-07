@@ -2,10 +2,10 @@ from typing import Protocol
 
 from .package_types import BaseRuleDict
 
-__all__ = ["ConvertRecordProtocol", "FieldConvertorProtocol"]
+__all__ = ["RecordConvertorProtocol", "FieldConvertorProtocol"]
 
 
-class ConvertRecordProtocol(Protocol):
+class RecordConvertorProtocol(Protocol):
     def convert(self, record: dict) -> dict: ...
 
 
