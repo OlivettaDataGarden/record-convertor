@@ -16,25 +16,42 @@ import jmespath
 from jmespath.exceptions import ParseError
 
 from .package_settings import (
-    ConvertRecordProtocol,
     EvaluateConditions,
     keys_in_lower_case,
     RecConvKeys,
     SkipConvKeys,
     SkipRuleDict,
+    FieldConvertorProtocol,
+    DateFormatProtocol,
 )
 from .rules_generator import RulesFromYAML
+
+from .field_convertors import BaseFieldConvertor, DateFieldConvertor
 
 
 class RecordConvertor:
     RULE_CLASS = RulesFromYAML
-    CONVERTOR: type[ConvertRecordProtocol]
     EVALUATE_CLASS = EvaluateConditions
     KEYS_IN_LOWER_CASE: bool = False
     DEFAULT_VALUE: dict = {}
+    DEFAULT_FIELD_CONVERTOR_CLASS: type[FieldConvertorProtocol] = BaseFieldConvertor
+    DEFAULT_DATE_FORMAT_CLASS: type[DateFormatProtocol] = DateFieldConvertor
 
-    def __init__(self, rule_source: RULE_CLASS.RULE_SOURCE_TYPE):
+    def __init__(
+        self,
+        rule_source: RULE_CLASS.RULE_SOURCE_TYPE,
+        field_convertor: Optional[type[FieldConvertorProtocol]] = None,
+        date_formatter: Optional[type[DateFormatProtocol]] = None,
+    ):
         self._rules = self.RULE_CLASS(rule_source=rule_source).rules
+        # set instance of given or default field convertor class
+        self._field_convertor: FieldConvertorProtocol = (
+            field_convertor or self.DEFAULT_FIELD_CONVERTOR_CLASS
+        )()
+        # set instance of given or default date format class
+        self._date_formatter: DateFormatProtocol = (
+            date_formatter or self.DEFAULT_DATE_FORMAT_CLASS
+        )()
 
     def convert(self, record: dict) -> dict:
         """
@@ -46,12 +63,38 @@ class RecordConvertor:
         Returns:
             dict: converted record
         """
+
         self._record = keys_in_lower_case(record) if self.KEYS_IN_LOWER_CASE else record
         for rule in self._rules.items():
+            # check if the rule determines that the given record can be skipped
             if self._skip_this_record(rule):
                 return self.DEFAULT_VALUE
 
+            # check if the rule triggers a field conversion in the input record
+            if self._convert_field_rule(rule):
+                _, rule_dict = rule
+                self._record = self._field_convertor.convert_field(
+                    record=self._record, conversion_rule=rule_dict
+                )
+                continue
+
+            # check if the rule triggers a field date conversion in the input record
+            if self._format_date_rule(rule):
+                _, rule_dict = rule
+                self._record = self._date_formatter.format_date_field(
+                    record=self._record, conversion_rule=rule_dict
+                )
+                continue
+
         return record
+
+    def _convert_field_rule(self, rule: tuple) -> bool:
+        rule_key, _ = rule
+        return "$convert" in rule_key
+
+    def _format_date_rule(self, rule: tuple) -> bool:
+        rule_key, _ = rule
+        return "$format_date" in rule_key
 
     def _skip_this_record(self, rule: tuple) -> bool:
         rule_key, rule_value = rule

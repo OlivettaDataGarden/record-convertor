@@ -1,7 +1,7 @@
 """Module to provide a class to make updates to an input Record
 
 Class:
-    RecordFieldConvertor
+    BaseFieldConvertor
 
 This class allows you to do a number of conversions on a record. This is
 usually done prior to creating a new record from this existing record, thus
@@ -102,23 +102,23 @@ Availale conversion
 
 import json
 from datetime import date, timedelta
-from typing import Optional, Union
+from typing import Optional, Union, Any
 
 import jmespath
 import phonenumbers
 from jmespath.exceptions import ParseError
 
-from ....package_settings import BaseConvertorKeys, BaseRuleDict, EvaluateConditions
+from ...package_settings import BaseConvertorKeys, BaseRuleDict, EvaluateConditions
 from .base_convertor_helpers import (
     DataFromHTMLSnippet,
     iso3116_from_alpha_3_country_code,
     normalize_string,
 )
 
-__all__ = ["RecordFieldConvertor"]
+__all__ = ["BaseFieldConvertor"]
 
 
-class RecordFieldConvertor:
+class BaseFieldConvertor:
     """
     Class to perform conversions on a given record and return the updated
     record
@@ -138,7 +138,9 @@ class RecordFieldConvertor:
             returns: record (dict) -> the converted record
     """
 
-    def __init__(self, record: dict, conversion_rule: BaseRuleDict):
+    def convert_field(
+        self, record: dict[str, Any], conversion_rule: BaseRuleDict
+    ) -> dict:
         self.record = record
         self.conversion_rule = conversion_rule
         self.field_name = conversion_rule.get(BaseConvertorKeys.FIELDNAME)
@@ -146,7 +148,6 @@ class RecordFieldConvertor:
             raise ValueError("Fieldname not provided in conversion rule")
         self.field_value = self._get_field(self.field_name)
 
-    def convert(self) -> dict:
         actions = self.conversion_rule[BaseConvertorKeys.ACTIONS] or {}
         if self.all_conditions_true():
             for action_dict in actions:

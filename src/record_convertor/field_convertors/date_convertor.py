@@ -29,7 +29,7 @@ from typing import Dict, Literal
 import jmespath
 from jmespath.exceptions import ParseError
 
-from ...package_settings import (
+from ..package_settings import (
     EvaluateConditions,
     FormatDateConvKeys,
     FormatDateRuleDict,
@@ -91,7 +91,26 @@ class DateFieldConvertor:
         To convert a date field within a record, instantiate the `DateFieldConvertor` with the target record and a rule dict outlining the conversion specifics. Then, call the `convert_date` method to apply the conversion.
     """
 
-    def __init__(self, record: Dict, conversion_rule: FormatDateRuleDict):
+    def format_date_field(
+        self, record: dict, conversion_rule: FormatDateRuleDict
+    ) -> dict:
+        """
+        Method to convert a date field in a record into into a
+        'YYYY-MM-DD' string date format.
+        """
+        self._record = record
+        self.date_field_key_name: str = self._get_date_field_key_name(conversion_rule)
+        date_formatter_method = self._get_date_formatter_method_name(conversion_rule)
+        date_field_value = self._get_field()
+
+        if date_field_value and self.all_conditions_true(
+            date_field_value, conversion_rule
+        ):
+            date_in_new_format = getattr(self, date_formatter_method)(date_field_value)
+            self.update_field_with_date(date_in_new_format)
+
+        return self._record
+
         """
         Initializes the DateFieldConvertor with a record and a set of conversion rules.
 
@@ -99,10 +118,6 @@ class DateFieldConvertor:
         - record (Dict): The record containing the date field to be converted.
         - conversion_rule (RuleDict): The conversion rules specifying the fieldname, actions, and optional conditions.
         """
-
-        self.record = record
-        self.conversion_rule = conversion_rule
-        self.date_field_key_name: str = self._get_date_field_key_name(conversion_rule)
 
     @staticmethod
     def unix_dt_stamp(unix_dt_stamp: str) -> str:
@@ -138,25 +153,11 @@ class DateFieldConvertor:
         datetime_date = datetime.strptime(date_str, "%d.%m.%Y")
         return datetime_date.strftime("%Y-%m-%d")
 
-    def convert_date(self) -> Dict:
-        """
-        Method to convert a date field in a record into into a
-        'YYYY-MM-DD' string date format.
-        """
-        date_formatter_method = self._get_date_formatter_method_name(
-            self.conversion_rule
-        )
-        date_field_value = self._get_field()
-
-        if date_field_value and self.all_conditions_true(date_field_value):
-            date_in_new_format = getattr(self, date_formatter_method)(date_field_value)
-            self.update_field_with_date(date_in_new_format)
-
-        return self.record
-
-    def all_conditions_true(self, date_field_value: str) -> bool:
+    def all_conditions_true(
+        self, date_field_value: str, conversion_rule: FormatDateRuleDict
+    ) -> bool:
         """Returns True if all provided conditions are satisfied."""
-        conditions = self.conversion_rule.get(FormatDateConvKeys.CONDITION, False)
+        conditions = conversion_rule.get(FormatDateConvKeys.CONDITION, False)
         if not conditions:
             return True
 
@@ -175,7 +176,7 @@ class DateFieldConvertor:
         first_field_name = nested_field_names.pop(0)
         # if it is not a nested field update first level field name and return
         if not nested_field_names:
-            self.record.update({first_field_name: date_in_new_format})
+            self._record.update({first_field_name: date_in_new_format})
             return
 
         # if it is a nested field capture the fieldname that needs to be
@@ -183,7 +184,7 @@ class DateFieldConvertor:
         last_field = nested_field_names.pop()
 
         # find the nested dict in whih the last_field is a (nested) key
-        field_value = self.record.get(first_field_name, None)
+        field_value = self._record.get(first_field_name, None)
         if field_value is None:
             return None
 
@@ -218,7 +219,7 @@ class DateFieldConvertor:
         nested_field_names = self.date_field_key_name.split(".")
         nested_key = ".".join(['"' + name + '"' for name in nested_field_names])
         try:
-            date_value_from_record = jmespath.search(nested_key, self.record)
+            date_value_from_record = jmespath.search(nested_key, self._record)
         except ParseError:
             return ""
 

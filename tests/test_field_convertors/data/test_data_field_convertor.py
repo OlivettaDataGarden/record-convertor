@@ -6,7 +6,15 @@ BASE_PARAMS = {
     },
 }
 
-BASE_PARAMS_WITH_CONDITION = {
+URL_PARAMS = {
+    "record": {"url": "www.test.com/?test_params=1"},
+    "conversion_rule": {
+        "fieldname": "url",
+        "actions": [{"remove_params_from_url": None}],
+    },
+}
+
+URL_PARAMS_WITH_CONDITION = {
     "record": {"url": "www.test.com/?test_params=1"},
     "conversion_rule": {
         "fieldname": "url",
@@ -152,6 +160,7 @@ PARAMS_ADD_KEY_VALUE_FROM_FIELD = {
         "actions": [{"add_key_value_from_field": "from_field"}],
     },
 }
+
 
 PARAMS_ADD_DATA_FROM_DICT = {
     "record": {"from_field": {"abc": {"1": 1, "2": 2}}, "to_field": {"0": 0}},
