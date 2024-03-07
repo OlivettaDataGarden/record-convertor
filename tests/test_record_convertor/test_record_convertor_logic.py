@@ -43,6 +43,10 @@ def test_record_sets_rules_source():
     assert RecordConvertorTest(rule_source="test")._rules == TEST_RULES
 
 
+######################################################
+#### Test the set record keys to lower case logic ####
+######################################################
+
 def test_record_convert_sets_keys_to_lower_case():
     class RecordConvertorTest(RecordConvertor):
         RULE_CLASS = EmptyRuleConvertorTest
@@ -64,9 +68,10 @@ def test_record_convert_does_not_set_keys_to_lower_case_by_default():
     assert record_convertor._record == {"KEY1": 1}
 
 
-##################################
-#### This skip record section ####
-##################################
+####################################
+#### Test the skip record logic ####
+####################################
+
 def test_skip_method_returns_false_if_skip_not_in_key():
     class RecordConvertorTest(RecordConvertor):
         RULE_CLASS = EmptyRuleConvertorTest
