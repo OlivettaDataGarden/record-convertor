@@ -1,7 +1,7 @@
 """Module to provide a class to make updates to an input Record
 
 Class:
-    RecordFieldConvertor
+    BaseFieldConvertor
 
 This class allows you to do a number of conversions on a record. This is
 usually done prior to creating a new record from this existing record, thus
@@ -115,10 +115,10 @@ from .base_convertor_helpers import (
     normalize_string,
 )
 
-__all__ = ["RecordFieldConvertor"]
+__all__ = ["BaseFieldConvertor"]
 
 
-class RecordFieldConvertor:
+class BaseFieldConvertor:
     """
     Class to perform conversions on a given record and return the updated
     record
@@ -146,7 +146,7 @@ class RecordFieldConvertor:
             raise ValueError("Fieldname not provided in conversion rule")
         self.field_value = self._get_field(self.field_name)
 
-    def convert(self) -> dict:
+    def convert_field(self) -> dict:
         actions = self.conversion_rule[BaseConvertorKeys.ACTIONS] or {}
         if self.all_conditions_true():
             for action_dict in actions:
