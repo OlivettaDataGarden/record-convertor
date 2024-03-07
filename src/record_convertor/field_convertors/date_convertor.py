@@ -91,7 +91,9 @@ class DateFieldConvertor:
         To convert a date field within a record, instantiate the `DateFieldConvertor` with the target record and a rule dict outlining the conversion specifics. Then, call the `convert_date` method to apply the conversion.
     """
 
-    def format_date_field(self, record: dict, conversion_rule: FormatDateRuleDict) -> dict:
+    def format_date_field(
+        self, record: dict, conversion_rule: FormatDateRuleDict
+    ) -> dict:
         """
         Method to convert a date field in a record into into a
         'YYYY-MM-DD' string date format.

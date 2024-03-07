@@ -22,7 +22,7 @@ from .package_settings import (
     SkipConvKeys,
     SkipRuleDict,
     FieldConvertorProtocol,
-    DateFormatProtocol
+    DateFormatProtocol,
 )
 from .rules_generator import RulesFromYAML
 
@@ -37,20 +37,21 @@ class RecordConvertor:
     DEFAULT_FIELD_CONVERTOR_CLASS: type[FieldConvertorProtocol] = BaseFieldConvertor
     DEFAULT_DATE_FORMAT_CLASS: type[DateFormatProtocol] = DateFieldConvertor
 
-
     def __init__(
         self,
         rule_source: RULE_CLASS.RULE_SOURCE_TYPE,
         field_convertor: Optional[type[FieldConvertorProtocol]] = None,
-        date_formatter: Optional[type[DateFormatProtocol]] = None 
+        date_formatter: Optional[type[DateFormatProtocol]] = None,
     ):
         self._rules = self.RULE_CLASS(rule_source=rule_source).rules
         # set instance of given or default field convertor class
-        self._field_convertor: FieldConvertorProtocol = \
-            (field_convertor or self.DEFAULT_FIELD_CONVERTOR_CLASS)()
+        self._field_convertor: FieldConvertorProtocol = (
+            field_convertor or self.DEFAULT_FIELD_CONVERTOR_CLASS
+        )()
         # set instance of given or default date format class
-        self._date_formatter: DateFormatProtocol = \
-            (date_formatter or self.DEFAULT_DATE_FORMAT_CLASS)()
+        self._date_formatter: DateFormatProtocol = (
+            date_formatter or self.DEFAULT_DATE_FORMAT_CLASS
+        )()
 
     def convert(self, record: dict) -> dict:
         """
