@@ -22,10 +22,11 @@ from .package_settings import (
     SkipConvKeys,
     SkipRuleDict,
     FieldConvertorProtocol,
+    DateFormatProtocol
 )
 from .rules_generator import RulesFromYAML
 
-from .field_convertors import BaseFieldConvertor
+from .field_convertors import BaseFieldConvertor, DateFieldConvertor
 
 
 class RecordConvertor:
@@ -34,15 +35,22 @@ class RecordConvertor:
     KEYS_IN_LOWER_CASE: bool = False
     DEFAULT_VALUE: dict = {}
     DEFAULT_FIELD_CONVERTOR_CLASS: type[FieldConvertorProtocol] = BaseFieldConvertor
+    DEFAULT_DATE_FORMAT_CLASS: type[DateFormatProtocol] = DateFieldConvertor
+
 
     def __init__(
         self,
         rule_source: RULE_CLASS.RULE_SOURCE_TYPE,
         field_convertor: Optional[type[FieldConvertorProtocol]] = None,
+        date_formatter: Optional[type[DateFormatProtocol]] = None 
     ):
         self._rules = self.RULE_CLASS(rule_source=rule_source).rules
-        field_convertor_class = field_convertor or self.DEFAULT_FIELD_CONVERTOR_CLASS
-        self._field_convertor = field_convertor_class()
+        # set instance of given or default field convertor class
+        self._field_convertor: FieldConvertorProtocol = \
+            (field_convertor or self.DEFAULT_FIELD_CONVERTOR_CLASS)()
+        # set instance of given or default date format class
+        self._date_formatter: DateFormatProtocol = \
+            (date_formatter or self.DEFAULT_DATE_FORMAT_CLASS)()
 
     def convert(self, record: dict) -> dict:
         """
@@ -72,7 +80,7 @@ class RecordConvertor:
             # check if the rule triggers a field date conversion in the input record
             if self._format_date_rule(rule):
                 _, rule_dict = rule
-                self._record = self._field_convertor.convert_field(
+                self._record = self._date_formatter.format_date_field(
                     record=self._record, conversion_rule=rule_dict
                 )
                 continue

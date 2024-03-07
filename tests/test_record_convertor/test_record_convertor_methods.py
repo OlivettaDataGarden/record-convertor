@@ -103,9 +103,9 @@ def test_convert_field_rule_method_returns_true_when_convert_in_rule_key():
     assert basic_test_convertor()._convert_field_rule(("$convert1", "test"))
 
 
-#############################################
-#### Test the _convert_field_rule method ####
-#############################################
+#######################################
+#### Test the _format_date  method ####
+#######################################
 
 
 def test_format_date_rule_method_returns_false_when_convert_not_in_rule_key():

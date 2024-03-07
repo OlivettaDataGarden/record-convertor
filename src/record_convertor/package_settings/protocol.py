@@ -1,8 +1,8 @@
 from typing import Protocol
 
-from .package_types import BaseRuleDict
+from .package_types import BaseRuleDict, FormatDateRuleDict
 
-__all__ = ["RecordConvertorProtocol", "FieldConvertorProtocol"]
+__all__ = ["RecordConvertorProtocol", "FieldConvertorProtocol", "DateFormatProtocol"]
 
 
 class RecordConvertorProtocol(Protocol):
@@ -11,3 +11,9 @@ class RecordConvertorProtocol(Protocol):
 
 class FieldConvertorProtocol(Protocol):
     def convert_field(self, record: dict, conversion_rule: BaseRuleDict) -> dict: ...
+
+
+class DateFormatProtocol(Protocol):
+    def format_date_field(
+        self, record: dict, conversion_rule: FormatDateRuleDict
+    ) -> dict: ...

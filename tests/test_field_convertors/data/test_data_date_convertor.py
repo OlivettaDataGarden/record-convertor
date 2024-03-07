@@ -18,7 +18,6 @@ BASE_PARAMS_NESTED_DATE_FIELD = {
     "conversion_rule": {"date_field": "date.nested_date", "format": "DD-MM-YYYY"},
 }
 
-
 BASE_PARAMS_YYYY_MM_DD = {
     "record": {"date": "2021-02-21"},
     "conversion_rule": {"date_field": "date", "format": "YYYY-MM-DD"},

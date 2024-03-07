@@ -1,9 +1,9 @@
-from typing import Optional
+from record_convertor.package_settings import BaseRuleDict, FormatDateRuleDict
 from record_convertor import RecordConvertor, EvaluateConditions
 
-TEST_RULES = {"rule1": "test"}
+TEST_RULE = {"fieldname": "field1", "actions": []}
 SKIP_RULE = {"fieldname": "field1", "condition": {"does_not_equal": "test"}}
-
+TEST_FORMAT_DATE_RULE = {"date_field": "date", "format": "YYYY-MM-DD"}
 
 class EveluateConditionsAlwaysToTrue(EvaluateConditions):
     def evaluate(self) -> bool:
@@ -17,7 +17,7 @@ class EveluateConditionsAlwaysToFalse(EvaluateConditions):
 
 class RuleConvertorTest:
     RULE_SOURCE_TYPE = str
-    DEFAULT_RULE = TEST_RULES
+    DEFAULT_RULE = TEST_RULE
 
     def __init__(self, rule_source: RULE_SOURCE_TYPE): ...
 
@@ -29,17 +29,33 @@ class RuleConvertorTest:
 class EmptyRuleConvertorTest(RuleConvertorTest):
     DEFAULT_RULE = {}
 
+class FieldConvertorTest():
+    DEFAULT_RESULT: dict = {"ouput": "ouptut value"}
+
+    def convert_field(self, record: dict, conversion_rule: BaseRuleDict) -> dict:
+        return self.DEFAULT_RESULT
+
+class DateFormatTest():
+    DEFAULT_RESULT: dict = {"date1": "formatted_date"}
+
+    def format_date_field(self, record: dict, conversion_rule: FormatDateRuleDict) -> dict:
+        return self.DEFAULT_RESULT
 
 def basic_test_convertor(
     rule_class: type[RuleConvertorTest] = RuleConvertorTest,
     evaluate_class: type[EvaluateConditions] = EveluateConditionsAlwaysToTrue,
+    field_convertor_class: type[FieldConvertorTest] = FieldConvertorTest,
+    date_format_class: type[DateFormatTest] = DateFormatTest,
 ) -> RecordConvertor:
     class RecordConvertorTest(RecordConvertor):
         RULE_CLASS = rule_class
         EVALUATE_CLASS = evaluate_class
         _record = {}
 
-    return RecordConvertorTest(rule_source="test")
+    return RecordConvertorTest(
+        rule_source="test",
+        field_convertor=field_convertor_class,
+        date_formatter=date_format_class)
 
 
 def test_record_convertor_class_exits():
@@ -97,16 +113,60 @@ def test_record_convert_does_not_set_keys_to_lower_case_by_default():
 
 
 def test_skip_method_returns_false_if_skip_not_in_key():
-    record_convertor = basic_test_convertor(rule_class=EmptyRuleConvertorTest)
+    record_convertor = basic_test_convertor()
     assert not record_convertor._skip_this_record(rule=("$NOT_SKIP", SKIP_RULE))
 
 
 def test_skip_method_returns_true_if_skip_in_key_and_confition_is_true():
-    record_convertor = basic_test_convertor(rule_class=EmptyRuleConvertorTest)
+    record_convertor = basic_test_convertor()
     assert record_convertor._skip_this_record(rule=("$SKIP", SKIP_RULE))
 
 
 def test_skip_method_returns_false_if_skip_in_key_and_confition_is_false():
-    record_convertor = basic_test_convertor(rule_class=EmptyRuleConvertorTest)
+    record_convertor = basic_test_convertor()
     record_convertor.__class__.EVALUATE_CLASS = EveluateConditionsAlwaysToFalse
     assert not record_convertor._skip_this_record(rule=("$SKIP", SKIP_RULE))
+
+
+#################################################
+#### Test the _convert_field in record logic ####
+#################################################
+
+
+def test_field_convert_method_changes_the_input_record_with_convert_key():
+    class TestConvertRuleClass(RuleConvertorTest):
+        DEFAULT_RULE={"$convert1": TEST_RULE}
+    record_convertor = basic_test_convertor(rule_class=TestConvertRuleClass)
+    input_record = {"input": "input value"}
+    record_convertor.convert(input_record)
+    assert record_convertor._record == FieldConvertorTest.DEFAULT_RESULT
+
+def test_field_convert_method_no_change_of_input_without_convert_key():
+    class TestConvertRuleClass(RuleConvertorTest):
+        DEFAULT_RULE={"$no_convert": None}
+    record_convertor = basic_test_convertor(rule_class=TestConvertRuleClass)
+    input_record = {"input": "input value"}
+    record_convertor.convert(input_record)
+    assert record_convertor._record == {"input": "input value"}
+
+
+#################################################
+#### Test the _convert_field in record logic ####
+#################################################
+
+
+def test_format_date_method_changes_input_record_with_format_date_key():
+    class TestConvertRuleClass(RuleConvertorTest):
+        DEFAULT_RULE={"$format_date1": TEST_FORMAT_DATE_RULE}
+    record_convertor = basic_test_convertor(rule_class=TestConvertRuleClass)
+    input_record = {"date1": "date1"}
+    record_convertor.convert(input_record)
+    assert record_convertor._record == {"date1": "formatted_date"}
+
+def test_format_date_method_leaves_input_as_is_without_convert_key():
+    class TestConvertRuleClass(RuleConvertorTest):
+        DEFAULT_RULE={"$no_format_date1": TEST_FORMAT_DATE_RULE}
+    record_convertor = basic_test_convertor(rule_class=TestConvertRuleClass)
+    input_record = {"date1": "date1"}
+    record_convertor.convert(input_record)
+    assert record_convertor._record == {"date1": "date1"}
