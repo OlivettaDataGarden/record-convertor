@@ -1,7 +1,7 @@
 import jmespath
 from jmespath.exceptions import ParseError
 
-from record_convertor.processor.command import ProcessCommand
+from record_convertor.command_processor import ProcessCommand
 
 
 class AbstractCommand:

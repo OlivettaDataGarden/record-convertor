@@ -37,7 +37,7 @@ from data.test_data_process_command import (
     PARAMS_TO_LIST_DYNAMIC,
 )
 
-from record_convertor.processor.command import ProcessCommand
+from record_convertor.command_processor import ProcessCommand
 
 
 def field_processor(params):
@@ -116,7 +116,7 @@ def test_point(mocker):
     """test create an int from a string"""
     mocked_point = "test123"
     mocker.patch(
-        "record_convertor.processor.command.command_processor.lat_lon_to_geojson_point",
+        "record_convertor.command_processor.lat_lon_to_geojson_point",
         return_value=mocked_point,
     )
     processor = field_processor(PARAMS_POINT)
