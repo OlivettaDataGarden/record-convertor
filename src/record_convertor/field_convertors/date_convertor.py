@@ -29,7 +29,7 @@ from typing import Dict, Literal
 import jmespath
 from jmespath.exceptions import ParseError
 
-from ...package_settings import (
+from ..package_settings import (
     EvaluateConditions,
     FormatDateConvKeys,
     FormatDateRuleDict,

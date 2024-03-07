@@ -11,7 +11,7 @@ from data.test_data_date_convertor import (
     BASE_PARAMS_YYYY_MM_DD_Time,
 )
 
-from record_convertor.processor.field_convertors import DateFieldConvertor
+from record_convertor.field_convertors import DateFieldConvertor
 
 
 def date_convertor(params):

@@ -44,7 +44,7 @@ from data.test_data_field_convertor import (
     PARAMS_TO_UPPER_STR,
 )
 
-from record_convertor.processor.field_convertors import RecordFieldConvertor
+from record_convertor.field_convertors import RecordFieldConvertor
 
 
 def convertor(**params):
