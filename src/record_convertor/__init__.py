@@ -10,7 +10,7 @@ usage:
 >>>     RecordConvertor(rules: Rules).convert(record: dict)
 """
 
-from typing import Any
+from typing import Any, Optional
 
 import jmespath
 from jmespath.exceptions import ParseError
@@ -66,7 +66,7 @@ class RecordConvertor:
             True if self.EVALUATE_CLASS(conditions, field_value).evaluate() else False
         )
 
-    def _get_field(self, key: str) -> Any:
+    def _get_field(self, key: Optional[str]) -> Any:
         if key:
             # key elemenets in nested keys are surround with "". For exmample
             # key.example-1 becomes "key"."example-1".
