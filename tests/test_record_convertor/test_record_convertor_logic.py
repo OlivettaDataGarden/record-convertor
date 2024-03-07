@@ -31,8 +31,8 @@ class EmptyRuleConvertorTest(RuleConvertorTest):
 
 
 def basic_test_convertor(
-        rule_class: type[RuleConvertorTest] = RuleConvertorTest,
-        evaluate_class: type[EvaluateConditions] = EveluateConditionsAlwaysToTrue,
+    rule_class: type[RuleConvertorTest] = RuleConvertorTest,
+    evaluate_class: type[EvaluateConditions] = EveluateConditionsAlwaysToTrue,
 ) -> RecordConvertor:
     class RecordConvertorTest(RecordConvertor):
         RULE_CLASS = rule_class
