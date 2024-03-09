@@ -63,30 +63,47 @@ class RecordConvertor:
         Returns:
             dict: converted record
         """
-
+        output_record = {}
         self._record = keys_in_lower_case(record) if self.KEYS_IN_LOWER_CASE else record
+
+        # process all rules (and nested rules)
         for rule in self._rules.items():
             # check if the rule determines that the given record can be skipped
+            # if so return default value
             if self._skip_this_record(rule):
                 return self.DEFAULT_VALUE
 
-            # check if the rule triggers a field conversion in the input record
-            if self._convert_field_rule(rule):
-                _, rule_dict = rule
-                self._record = self._field_convertor.convert_field(
-                    record=self._record, conversion_rule=rule_dict
-                )
+            # check if the rule requires a change on the input record to be done
+            # if rule is an input record update rule then proceed with the next rule.
+            if self._change_field_in_input_record_if_required(rule=rule):
                 continue
 
-            # check if the rule triggers a field date conversion in the input record
-            if self._format_date_rule(rule):
-                _, rule_dict = rule
-                self._record = self._date_formatter.format_date_field(
-                    record=self._record, conversion_rule=rule_dict
-                )
-                continue
+        return output_record
 
-        return record
+    def _change_field_in_input_record_if_required(self, rule: tuple) -> bool:
+        """
+        Checks if input record needs to be updated based upon the given.
+        If so update is performed.
+
+        Returns True if the rule is an input record update rule and false otherwise.
+        """
+        # check if the rule triggers a field conversion in the input record
+        if self._convert_field_rule(rule):
+            _, rule_dict = rule
+            self._record = self._field_convertor.convert_field(
+                record=self._record, conversion_rule=rule_dict
+            )
+            return True
+
+        # check if the rule triggers a field date conversion in the input record
+        if self._format_date_rule(rule):
+            _, rule_dict = rule
+            self._record = self._date_formatter.format_date_field(
+                record=self._record, conversion_rule=rule_dict
+            )
+            return True
+
+        return False
 
     def _convert_field_rule(self, rule: tuple) -> bool:
         rule_key, _ = rule
@@ -105,9 +122,7 @@ class RecordConvertor:
         fieldname = skip_rule.get(SkipConvKeys.FIELDNAME)
         field_value = self._get_field(fieldname)
 
-        return (
-            True if self.EVALUATE_CLASS(conditions, field_value).evaluate() else False
-        )
+        return self.EVALUATE_CLASS(conditions, field_value).evaluate()
 
     def _get_field(self, key: Optional[str]) -> Any:
         if key:
