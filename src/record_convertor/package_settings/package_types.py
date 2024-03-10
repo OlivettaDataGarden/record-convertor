@@ -11,6 +11,8 @@ __all__ = [
     "FormatDateConvKeys",
     "SkipConvKeys",
     "SkipRuleDict",
+    "DataClassRuleKeys",
+    'DataClassRuleDict',
 ]
 
 
@@ -40,6 +42,12 @@ class SkipConvKeys(GenericRuleKeys):
     FIELDNAME = "fieldname"
 
 
+class DataClassRuleKeys():
+    NAME = "data_class_name"
+    RECORD_CONVERSION_ARGUMENTS = "params"
+    METHODS = "methods"
+
+
 class BaseRuleDict(TypedDict):
     condition: Optional[ConditionsDict]
     format: Optional[str]  # used by date convertor
@@ -58,6 +66,12 @@ class FormatDateRuleDict(TypedDict):
 class SkipRuleDict(TypedDict):
     condition: ConditionsDict
     fieldname: str
+
+
+class DataClassRuleDict(TypedDict):
+    data_class_name: str
+    params: dict
+    methods: list[dict]
 
 
 RulesDict = Dict[str, Union[BaseRuleDict, FormatDateRuleDict, SkipRuleDict]]
