@@ -10,6 +10,7 @@ usage:
 >>>     RecordConvertor(rules: Rules).convert(record: dict)
 """
 
+from copy import copy
 from typing import Any, Optional
 
 import jmespath
@@ -23,6 +24,7 @@ from .package_settings import (
     SkipRuleDict,
     FieldConvertorProtocol,
     DateFormatProtocol,
+    RulesDict,
 )
 from .rules_generator import RulesFromYAML
 
@@ -36,6 +38,7 @@ class RecordConvertor:
     DEFAULT_VALUE: dict = {}
     DEFAULT_FIELD_CONVERTOR_CLASS: type[FieldConvertorProtocol] = BaseFieldConvertor
     DEFAULT_DATE_FORMAT_CLASS: type[DateFormatProtocol] = DateFieldConvertor
+    _stored_copy: Optional["RecordConvertor"] = None
 
     def __init__(
         self,
@@ -79,6 +82,22 @@ class RecordConvertor:
                 continue
 
         return output_record
+
+    def get_record_convertor_copy_with_new_rules(
+        self, new_rules: RulesDict
+    ) -> "RecordConvertor":
+        """Return as copy of the current record convertor instance with new conversion rules."""
+        # prevent from creating class copy everytime a record_convertor_copy is request
+        # bu storing the copy for re
+        new_record_convertor = self._copy
+        new_record_convertor._rules = new_rules
+        return new_record_convertor
+
+    @property
+    def _copy(self) -> "RecordConvertor":
+        if not self._stored_copy:
+            self._stored_copy = copy(self)
+        return self._stored_copy
 
     def _change_field_in_input_record_if_required(self, rule: tuple) -> bool:
         """
