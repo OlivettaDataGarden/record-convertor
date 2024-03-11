@@ -1,4 +1,4 @@
-from typing import Dict, Optional, TypedDict, Union
+from typing import Optional, TypedDict, Union
 
 from .conditions import ConditionsDict
 
@@ -74,6 +74,13 @@ class DataClassRuleDict(TypedDict):
     methods: list[dict]
 
 
-RulesDict = Dict[
-    str, Union[str, BaseRuleDict, FormatDateRuleDict, SkipRuleDict, DataClassRuleDict]
+RulesDict = Union[
+    BaseRuleDict,
+    FormatDateRuleDict,
+    SkipRuleDict,
+    DataClassRuleDict,
+    dict[
+        str,
+        Union[str, BaseRuleDict, FormatDateRuleDict, SkipRuleDict, DataClassRuleDict],
+    ],
 ]
