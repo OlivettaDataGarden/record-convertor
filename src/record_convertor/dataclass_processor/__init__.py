@@ -5,7 +5,7 @@ from ..package_settings import (
     DataClassRuleDict,
     DataClassRuleKeys,
     RecordConvertorProtocol,
-    DataclassInstance
+    DataclassInstance,
 )
 from dataclasses import is_dataclass
 
@@ -20,9 +20,7 @@ class DataClassProcessor:
         self._record = record
         self._record_covertor = record_convertor
         self._prepare_dataclass_settings(rules=rules)
-        return self._create_return_dict(rules=rules) 
-
-        return self._record
+        return self._create_return_dict(rules=rules)
 
     def register_dict_of_data_classes(self, dataclasses: dict[str, Type]):
         for dataclass_name, dataclass in dataclasses.items():
@@ -66,21 +64,25 @@ class DataClassProcessor:
 
     def _get_dataclass_content(self, rules: DataClassRuleDict) -> dict:
         """Convert input record into dataclass content using provided rules set."""
-        dataclass_content_creator = \
+        dataclass_content_creator = (
             self._record_covertor.get_record_convertor_copy_with_new_rules(
-                new_rules=rules)
+                new_rules=rules
+            )
+        )
         return dataclass_content_creator.convert(record=self._record)
 
     def _create_return_dict(self, rules: DataClassRuleDict) -> dict:
         dataclass_content = self._get_dataclass_content(rules)
         dataclass_instance = self._get_dataclass_instance(dataclass_content)
-    
+
     def _get_dataclass_instance(self, dataclass_content: dict) -> DataclassInstance:
         dataclass_instance = self._data_class_to_use(**dataclass_content)
         return dataclass_instance
         dataclass_instance = self._run_methods_on_dataclass(dataclass_instance)
-    
-    def _update_dataclass_with_provided_methods(self, dataclass_instance: DataclassInstance) -> DataclassInstance:
+
+    def _update_dataclass_with_provided_methods(
+        self, dataclass_instance: DataclassInstance
+    ) -> DataclassInstance:
         for method in self._data_class_methods:
             [[method, method_argument_rules]] = method.items()
             method_arguments = self._get_method_arguments(method_argument_rules)
@@ -89,8 +91,13 @@ class DataClassProcessor:
         return dataclass_instance
 
     def _get_method_arguments(self, method_argument_rules: dict) -> list[dict]:
-        method_arguments = self._record_covertor.get_record_convertor_copy_with_new_rules(
-                new_rules=method_argument_rules).convert(self._record)
-        return method_arguments if isinstance(method_arguments, list) else [method_arguments]
-            
-    
+        method_arguments = (
+            self._record_covertor.get_record_convertor_copy_with_new_rules(
+                new_rules=method_argument_rules
+            ).convert(self._record)
+        )
+        return (
+            method_arguments
+            if isinstance(method_arguments, list)
+            else [method_arguments]
+        )

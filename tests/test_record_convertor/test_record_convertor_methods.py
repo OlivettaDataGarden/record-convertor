@@ -131,10 +131,9 @@ def test_copy_attribute_sets_the_stored_copy_attribute():
 def test_copy_attribute_returns_stored_copy_attribute_when_not_None():
     class CopyRecordConvertor(RecordConvertor):
         RULE_CLASS = EmptyRuleConvertorTest
-    
+
     record_convertor = basic_test_convertor()
     copy_record_convertor = CopyRecordConvertor(rule_source="test")
 
     record_convertor._stored_copy = copy_record_convertor
     assert record_convertor._copy == copy_record_convertor
-    
