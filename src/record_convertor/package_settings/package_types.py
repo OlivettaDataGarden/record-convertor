@@ -12,7 +12,7 @@ __all__ = [
     "SkipConvKeys",
     "SkipRuleDict",
     "DataClassRuleKeys",
-    'DataClassRuleDict',
+    "DataClassRuleDict",
 ]
 
 
@@ -42,7 +42,7 @@ class SkipConvKeys(GenericRuleKeys):
     FIELDNAME = "fieldname"
 
 
-class DataClassRuleKeys():
+class DataClassRuleKeys:
     NAME = "data_class_name"
     RECORD_CONVERSION_ARGUMENTS = "params"
     METHODS = "methods"
@@ -74,4 +74,6 @@ class DataClassRuleDict(TypedDict):
     methods: list[dict]
 
 
-RulesDict = Dict[str, Union[BaseRuleDict, FormatDateRuleDict, SkipRuleDict]]
+RulesDict = Dict[
+    str, Union[str, BaseRuleDict, FormatDateRuleDict, SkipRuleDict, DataClassRuleDict]
+]
