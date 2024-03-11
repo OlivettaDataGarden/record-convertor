@@ -128,7 +128,7 @@ def test_prepare_data_class_settings_method():
     data_class_processor.register_dataclass(DataClassTest)
     rule = deepcopy(base_data_class_rule)
     rule[DataClassRuleKeys.NAME] = "data_class_test"
-    data_class_processor._prepare_data_class_settings(rule)
+    data_class_processor._prepare_dataclass_settings(rule)
     assert data_class_processor._data_class_to_use is DataClassTest
     assert (
         data_class_processor._record_convertor_args
