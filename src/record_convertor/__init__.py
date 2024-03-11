@@ -87,14 +87,14 @@ class RecordConvertor:
         self, new_rules: RulesDict
     ) -> "RecordConvertor":
         """Return as copy of the current record convertor instance with new conversion rules."""
-        # prevent from creating class copy everytime a record_convertor_copy is request
-        # bu storing the copy for re
         new_record_convertor = self._copy
         new_record_convertor._rules = new_rules
         return new_record_convertor
 
     @property
     def _copy(self) -> "RecordConvertor":
+        # prevent from creating class copy everytime a _copy method is called
+        # by storing the first copy in the _stored_copy attribute
         if not self._stored_copy:
             self._stored_copy = copy(self)
         return self._stored_copy
