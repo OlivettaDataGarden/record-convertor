@@ -95,7 +95,7 @@ def test_dataclass_name_setter_method():
     rule[DataClassRuleKeys.NAME] = "data_class_test"
     data_class_processor._set_dataclass_to_use(rule)
 
-    assert data_class_processor._data_class_to_use is DataClassTest
+    assert data_class_processor._dataclass_to_be_used is DataClassTest
 
 
 def test_dataclass_name_setter_raises_value_error_when_dataclass_name_not_known():
@@ -129,7 +129,7 @@ def test_prepare_data_class_settings_method():
     rule = deepcopy(base_data_class_rule)
     rule[DataClassRuleKeys.NAME] = "data_class_test"
     data_class_processor._prepare_dataclass_settings(rule)
-    assert data_class_processor._data_class_to_use is DataClassTest
+    assert data_class_processor._dataclass_to_be_used is DataClassTest
     assert (
         data_class_processor._record_convertor_args
         == base_data_class_rule[DataClassRuleKeys.RECORD_CONVERSION_ARGUMENTS]
