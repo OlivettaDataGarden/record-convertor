@@ -1,5 +1,14 @@
-from typing import Type
+"""
+This module provides functionality for using a dataclasses to generate a dict by using an input record and a set of rules.
+The rules determine how the input record will be convertod so that the dataclass instance can be generated. The dataclass might hold internal methods
+that can be called based upon the rules with arguments also based upon the rules.
 
+The class support regestering custom dataclasses to be used
+
+The class uses an injected record convertor to process the input record bases upon the provided rules
+"""
+
+from typing import Type
 from ..package_settings import (
     class_name_in_snake_case,
     DataClassRuleDict,
@@ -9,14 +18,33 @@ from ..package_settings import (
 )
 from dataclasses import is_dataclass, asdict
 
-
 class DataClassProcessor:
+    """
+    Processes dataclasses by applying a set of rules and converting dictionaries to dataclass instances.
+
+    This class provides methods to register dataclasses, apply conversion and transformation rules, and
+    generate dataclass instances from dictionaries. It is designed to work with a customizable set of rules
+    and leverages a protocol for converting records to dataclass-compatible formats.
+    """
+
     def data_from_dataclass(
         self,
         record: dict,
         rules: DataClassRuleDict,
         record_convertor: RecordConvertorProtocol,
     ) -> dict:
+        """
+        Uses a record as input to return a dict created by a dataclass. The dataclass in socpe is defined in the rules dict as well as
+        how to convert the input record to be converted before is used to create the dataclass instance.
+
+        Args:
+            record (dict): The input dict used to create the dataclass instance (after conversion).
+            rules (DataClassRuleDict): The rules to apply during the conversion of the input dict and the creation of the dataclass instance
+            record_convertor (RecordConvertorProtocol): The record convertor to use for data preparation.
+
+        Returns:
+            dict: The converted dataclass instance as a dictionary.
+        """
         self._record = record
         self._record_covertor = record_convertor
         self._prepare_dataclass_settings(rules=rules)
@@ -25,14 +53,32 @@ class DataClassProcessor:
     def register_dict_of_data_classes(
         self, dataclasses: dict[str, Type[DataclassInstance]]
     ):
+        """
+        Registers multiple dataclasses provided in a dictionary where keys are the dataclass names.
+
+        Args:
+            dataclasses (dict[str, Type[DataclassInstance]]): A dictionary of dataclass names to dataclass types.
+        """
         for dataclass_name, dataclass in dataclasses.items():
             self._register_dataclass(dataclass_name=dataclass_name, dataclass=dataclass)
 
     def register_data_classes(self, dataclasses: list[Type[DataclassInstance]]):
+        """
+        Registers a list of dataclasses.
+
+        Args:
+            dataclasses (list[Type[DataclassInstance]]): A list of dataclass types to register.
+        """
         for dataclass in dataclasses:
             self.register_dataclass(dataclass=dataclass)
 
     def register_dataclass(self, dataclass: Type[DataclassInstance]):
+        """
+        Registers a single dataclass.
+
+        Args:
+            dataclass (Type[DataclassInstance]): The dataclass type to register.
+        """
         data_class_name_snake_case = class_name_in_snake_case(dataclass.__name__)
         self._register_dataclass(
             dataclass_name=data_class_name_snake_case, dataclass=dataclass
@@ -41,25 +87,44 @@ class DataClassProcessor:
     def _register_dataclass(
         self, dataclass_name: str, dataclass: Type[DataclassInstance]
     ):
-        """Method to actually set define dataclass as an attribute of the dataclass processor."""
+        """
+        Registers a dataclass by setting it as an attribute of the processor instance.
+
+        Args:
+            dataclass_name (str): The name of the dataclass to register.
+            dataclass (Type[DataclassInstance]): The dataclass type.
+
+        Raises:
+            ValueError: If the provided class is not a dataclass.
+        """
         if not is_dataclass(dataclass):
             raise ValueError(f"class '{dataclass.__name__}' is not a dataclass")
         setattr(self, dataclass_name, dataclass)
 
     def _prepare_dataclass_settings(self, rules: DataClassRuleDict):
+        """
+        Prepares settings for dataclass processing being 
+        - rule set
+        - arguments for the intial record conversion
+        - methods and arguments to be run on the dataclass instance
+        """
         self._set_dataclass_to_use(rules)
         self._set_record_covertor_arguments(rules)
         self._set_dataclass_methods(rules)
 
+    
     def _set_record_covertor_arguments(self, rules: DataClassRuleDict):
+        """Set arguments for the intial record conversion."""
         self._record_convertor_args: dict = rules.get(
             DataClassRuleKeys.RECORD_CONVERSION_ARGUMENTS
         )
 
     def _set_dataclass_methods(self, rules: DataClassRuleDict):
+        """Set methods and their arguments to be used after the dataclass has been created."""
         self._data_class_methods: list[dict] = rules.get(DataClassRuleKeys.METHODS)
 
     def _set_dataclass_to_use(self, rules: DataClassRuleDict):
+        """Select the dataclass to be used from the registered dataclasses."""
         data_class_name = rules.get(DataClassRuleKeys.NAME)
         try:
             self._dataclass_to_be_used: Type = getattr(self, data_class_name)
@@ -76,11 +141,13 @@ class DataClassProcessor:
         return dataclass_content_creator.convert(record=self._record)
 
     def _create_return_dict(self, rules: DataClassRuleDict) -> dict:
+        """Create dict record to be returned."""
         dataclass_content = self._get_dataclass_content(rules)
         dataclass_instance = self._get_dataclass_instance(dataclass_content)
         return asdict(dataclass_instance)
 
     def _get_dataclass_instance(self, dataclass_content: dict) -> DataclassInstance:
+        """Create the dataclass instance and initiate the methods to be run."""
         dataclass_instance = self._dataclass_to_be_used(**dataclass_content)
         dataclass_instance = self._update_dataclass_with_provided_methods(
             dataclass_instance
@@ -90,6 +157,7 @@ class DataClassProcessor:
     def _update_dataclass_with_provided_methods(
         self, dataclass_instance: DataclassInstance
     ) -> DataclassInstance:
+        """Execute each method on the data class."""
         for method in self._data_class_methods:
             [[method, method_argument_rules]] = method.items()
             method_arguments = self._get_method_arguments(method_argument_rules)
@@ -98,6 +166,7 @@ class DataClassProcessor:
         return dataclass_instance
 
     def _get_method_arguments(self, method_argument_rules: dict) -> list[dict]:
+        """Retrieve method arguments from the method rules."""
         method_arguments = (
             self._record_covertor.get_record_convertor_copy_with_new_rules(
                 new_rules=method_argument_rules
