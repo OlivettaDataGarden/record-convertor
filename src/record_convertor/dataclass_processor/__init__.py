@@ -7,7 +7,7 @@ from ..package_settings import (
     RecordConvertorProtocol,
     DataclassInstance,
 )
-from dataclasses import is_dataclass
+from dataclasses import is_dataclass, asdict
 
 
 class DataClassProcessor:
@@ -22,21 +22,25 @@ class DataClassProcessor:
         self._prepare_dataclass_settings(rules=rules)
         return self._create_return_dict(rules=rules)
 
-    def register_dict_of_data_classes(self, dataclasses: dict[str, Type]):
+    def register_dict_of_data_classes(
+        self, dataclasses: dict[str, Type[DataclassInstance]]
+    ):
         for dataclass_name, dataclass in dataclasses.items():
             self._register_dataclass(dataclass_name=dataclass_name, dataclass=dataclass)
 
-    def register_data_classes(self, dataclasses: list[Type]):
+    def register_data_classes(self, dataclasses: list[Type[DataclassInstance]]):
         for dataclass in dataclasses:
             self.register_dataclass(dataclass=dataclass)
 
-    def register_dataclass(self, dataclass: Type):
+    def register_dataclass(self, dataclass: Type[DataclassInstance]):
         data_class_name_snake_case = class_name_in_snake_case(dataclass.__name__)
         self._register_dataclass(
             dataclass_name=data_class_name_snake_case, dataclass=dataclass
         )
 
-    def _register_dataclass(self, dataclass_name: str, dataclass: Type):
+    def _register_dataclass(
+        self, dataclass_name: str, dataclass: Type[DataclassInstance]
+    ):
         """Method to actually set define dataclass as an attribute of the dataclass processor."""
         if not is_dataclass(dataclass):
             raise ValueError(f"class '{dataclass.__name__}' is not a dataclass")
@@ -58,7 +62,7 @@ class DataClassProcessor:
     def _set_dataclass_to_use(self, rules: DataClassRuleDict):
         data_class_name = rules.get(DataClassRuleKeys.NAME)
         try:
-            self._data_class_to_use: Type = getattr(self, data_class_name)
+            self._dataclass_to_be_used: Type = getattr(self, data_class_name)
         except AttributeError:
             raise ValueError(f"Unknown dataclass '{data_class_name} defines in rules")
 
@@ -74,11 +78,14 @@ class DataClassProcessor:
     def _create_return_dict(self, rules: DataClassRuleDict) -> dict:
         dataclass_content = self._get_dataclass_content(rules)
         dataclass_instance = self._get_dataclass_instance(dataclass_content)
+        return asdict(dataclass_instance)
 
     def _get_dataclass_instance(self, dataclass_content: dict) -> DataclassInstance:
-        dataclass_instance = self._data_class_to_use(**dataclass_content)
+        dataclass_instance = self._dataclass_to_be_used(**dataclass_content)
+        dataclass_instance = self._update_dataclass_with_provided_methods(
+            dataclass_instance
+        )
         return dataclass_instance
-        dataclass_instance = self._run_methods_on_dataclass(dataclass_instance)
 
     def _update_dataclass_with_provided_methods(
         self, dataclass_instance: DataclassInstance
