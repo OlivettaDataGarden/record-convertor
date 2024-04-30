@@ -1,3 +1,64 @@
+This package allows you to create a new record (dict) from an existing record (dict) based upon a config file (YAML file)
+
+By creating an instance of the `RecordConvertor` convertor class with a specific rule set you get a record convertor
+specifically tailored for your conversion purposes.
+
+>>> my_record_convertor = RecordConvertor(my_rule_set)
+
+You can then call `convert()` on this class to convert your record.
+
+>>> converted_record = my_record_convertor.convert(input_record)
+
+This way you can easily convert all records comming back from an API into a single format.
+
+
+
+
+
+for step 1 two options are available
+1. generic conversion -> use $convertXYZ as instruction key 
+2. date conversion -> use $format_dataXYZ as instruction key
+
+XYZ being a unique string.
+
+examples:
+
+$convert1:
+  fieldname: customerreference
+  actions: [{ "to_str": None }]
+
+-> this will convert the 'customerreference' field to string format_dataXYZ
+
+$format_date:
+  date_field: item.lastupdate
+  format: UNIX_DT_STAMP
+
+-> this will convert the nested 'item.lastupdate' with a UNIX date stamp to a default string formatted value
+
+Both $convert and $format_date have their own conversion class and rule type that desribes the conversion.
+These class
+
+
+The conversion class can be overruled by providing a custom conversion class. 
+
+after step 1 the input record should be ready for use and the new record can be build up.
+For this you can define the key names in de the dict and field name from which to get the value.
+This can be a nested field name from the input record.
+
+For example
+
+[yaml]
+product_brand_name: inventory.item.brand.name
+product_name: inventory.item.name
+product_sku_nr: inventory.item.product_sku_nr
+
+this allows you to easily convert data from different sources to an identical data model.
+
+There are a few specific commands in step 2.
+
+- $dataclass: this allows you to use specific dataclasses to validate the input data
+
+
 Layer 1:
 
 module record_convertor

@@ -108,262 +108,261 @@ __all__ = ["ProcessCommand"]
 
 
 class ProcessCommand:
-    """
-    Class to create a value for the output record, mostly based upon one or
-    more fields from the input record.
+	"""
+	Class to create a value for the output record, mostly based upon one or
+	more fields from the input record.
 
-    args:
-        record (dict): record that needs some conversion action
-        process_command (str) : process command to be executed to obtain the
-                                correct value from the record
-        process_args (str, dict) : arguments needed to run the process command
-        add_process_commands (dict) : dict with process names and custom
-                                      lambda's
+	args:
+	    record (dict): record that needs some conversion action
+	    process_command (str) : process command to be executed to obtain the
+	                            correct value from the record
+	    process_args (str, dict) : arguments needed to run the process command
+	    add_process_commands (dict) : dict with process names and custom
+	                                  lambda's
 
 
-    returns:
-        value (dict, list, str, int, float): output of teh conversion
-    """
+	returns:
+	    value (dict, list, str, int, float): output of teh conversion
+	"""
 
-    def __init__(
-        self,
-        record: Dict,
-        process_command: str,
-        process_args: Union[Dict, List],
-        record_convertor,
-        add_process_commands=None,
-    ):
-        self.record = record
-        # remove the `$` from the command
-        self.process_command = process_command[1:]
-        self.process_args = process_args
-        self.record_convertor = record_convertor
-        self.add_process_commands = add_process_commands or {}
+	def __init__(
+		self,
+		record: Dict,
+		process_command: str,
+		process_args: Union[Dict, List],
+		record_convertor,
+		add_process_commands=None,
+	):
+		self.record = record
+		# remove the `$` from the command
+		self.process_command = process_command[1:]
+		self.process_args = process_args
+		self.record_convertor = record_convertor
+		self.add_process_commands = add_process_commands or {}
 
-    def current_year(self):
-        """Returns current year in 4 decimals"""
-        return str(datetime.now().year)
+	def current_year(self):
+		"""Returns current year in 4 decimals"""
+		return str(datetime.now().year)
 
-    def set_to_none_value(self):
-        """Returns None value"""
-        return None
+	def set_to_none_value(self):
+		"""Returns None value"""
+		return None
 
-    def allow_none_value(self):
-        """Returns value for field and None if no field can be found"""
-        return self._get_field(self.process_args.get("field_name"))
+	def allow_none_value(self):
+		"""Returns value for field and None if no field can be found"""
+		return self._get_field(self.process_args.get("field_name"))
 
-    def to_list(self):
-        """
-        retrieve the values for a list of fields and returns them as a list
-        """
-        return list(
-            filter(
-                None, [self._get_field(field_name) for field_name in self.process_args]
-            )
-        )
+	def to_list(self):
+		"""
+		retrieve the values for a list of fields and returns them as a list
+		"""
+		return list(
+			filter(
+				None,
+				[self._get_field(field_name) for field_name in self.process_args],
+			)
+		)
 
-    def to_int(self):
-        """removes a list of strings from a string and returns what remains"""
-        amount = self._get_field(self.process_args.get("field_name", None))
-        if not amount:
-            return None
-        remove_list = self.process_args.get("strip", None)
-        if isinstance(remove_list, (str, int)):
-            remove_list = [str(remove_list)]
-        for item in remove_list:
-            amount = amount.replace(item, "")
-        return amount
+	def to_int(self):
+		"""removes a list of strings from a string and returns what remains"""
+		amount = self._get_field(self.process_args.get("field_name", None))
+		if not amount:
+			return None
+		remove_list = self.process_args.get("strip", None)
+		if isinstance(remove_list, (str, int)):
+			remove_list = [str(remove_list)]
+		for item in remove_list:
+			amount = amount.replace(item, "")
+		return amount
 
-    def first_item_from_list(self):
-        items_from_list = self.from_list()
-        if items_from_list:
-            return items_from_list[0]
-        return None
+	def first_item_from_list(self):
+		items_from_list = self.from_list()
+		if items_from_list:
+			return items_from_list[0]
+		return None
 
-    def from_list(self):
-        """
-        converts a list of dicts from the input record to a new cleaned list of
-        dicts
-        """
-        rules = self.process_args.copy()
-        obj_list = self._get_field(rules.pop("list_field_name"))
+	def from_list(self):
+		"""
+		converts a list of dicts from the input record to a new cleaned list of
+		dicts
+		"""
+		rules = self.process_args.copy()
+		obj_list = self._get_field(rules.pop("list_field_name"))
 
-        if not (obj_list and isinstance(obj_list, list)):
-            return []
+		if not (obj_list and isinstance(obj_list, list)):
+			return []
 
-        return list(
-            filter(
-                None,
-                [
-                    self.record_convertor(rules=rules, record=obj).convert()
-                    for obj in obj_list
-                ],
-            )
-        )
+		return list(
+			filter(
+				None,
+				[
+					self.record_convertor(rules=rules, record=obj).convert()
+					for obj in obj_list
+				],
+			)
+		)
 
-    def to_list_dynamic(self):
-        return list(
-            filter(
-                None,
-                [
-                    self.record_convertor(rules=rule, record=self.record).convert()
-                    for rule in self.process_args
-                ],
-            )
-        )
+	def to_list_dynamic(self):
+		return list(
+			filter(
+				None,
+				[
+					self.record_convertor(rules=rule, record=self.record).convert()
+					for rule in self.process_args
+				],
+			)
+		)
 
-    def join_key_value(self):
-        key_key = self.process_args.get("key", False)
-        value_key = self.process_args.get("value", False)
-        if not (key_key and value_key):
-            raise KeyError("Missing `key` or `value` argument")
+	def join_key_value(self):
+		key_key = self.process_args.get("key", False)
+		value_key = self.process_args.get("value", False)
+		if not (key_key and value_key):
+			raise KeyError("Missing `key` or `value` argument")
 
-        # check if key value needs to be composed
-        if isinstance(key_key, dict):
-            key = self.record_convertor(rules=key_key, record=self.record).convert()
-        else:
-            key = self._get_field(key_key)
+		# check if key value needs to be composed
+		if isinstance(key_key, dict):
+			key = self.record_convertor(rules=key_key, record=self.record).convert()
+		else:
+			key = self._get_field(key_key)
 
-        # check if value value needs to be composed
-        if isinstance(value_key, dict):
-            value = self.record_convertor(rules=value_key, record=self.record).convert()
-        else:
-            value = self._get_field(value_key)
+		# check if value value needs to be composed
+		if isinstance(value_key, dict):
+			value = self.record_convertor(rules=value_key, record=self.record).convert()
+		else:
+			value = self._get_field(value_key)
 
-        if key and value:
-            try:
-                return {key: value}
-            except (TypeError, KeyError):
-                pass
-        return None
+		if key and value:
+			try:
+				return {key: value}
+			except (TypeError, KeyError):
+				pass
+		return None
 
-    def key_value(self):
-        key = self.process_args.get("key", False)
-        value = self.process_args.get("value", False)
-        if not (key and value):
-            raise KeyError("Missing `key` or `value` argument")
-        return {key: self._get_field(value)}
+	def key_value(self):
+		key = self.process_args.get("key", False)
+		value = self.process_args.get("value", False)
+		if not (key and value):
+			raise KeyError("Missing `key` or `value` argument")
+		return {key: self._get_field(value)}
 
-    def full_record(self):
-        """returns the full record"""
-        return self.record
+	def full_record(self):
+		"""returns the full record"""
+		return self.record
 
-    def point(self):
-        """
-        Retrieves lat, lon fields from record and returns them in point format.
-        """
-        # check if lat and lon field names are provided in the value
-        lat_field = self.process_args.get("lat", False)
-        lon_field = self.process_args.get("lon", False)
-        if not (lat_field and lon_field):
-            raise ValueError("Both lat and lon field required for Point Field")
+	def point(self):
+		"""
+		Retrieves lat, lon fields from record and returns them in point format.
+		"""
+		# check if lat and lon field names are provided in the value
+		lat_field = self.process_args.get("lat", False)
+		lon_field = self.process_args.get("lon", False)
+		if not (lat_field and lon_field):
+			raise ValueError("Both lat and lon field required for Point Field")
 
-        # get the lattitude and longitude from the record and return point
-        # field
-        lat = self._get_field(lat_field)
-        lon = self._get_field(lon_field)
-        return lat_lon_to_geojson_point(latitude=lat, longitude=lon)
+		# get the lattitude and longitude from the record and return point
+		# field
+		lat = self._get_field(lat_field)
+		lon = self._get_field(lon_field)
+		return lat_lon_to_geojson_point(latitude=lat, longitude=lon)
 
-    def join(self):
-        """
-        joins the record values for the list of keys to a single string
-        """
+	def join(self):
+		"""
+		joins the record values for the list of keys to a single string
+		"""
 
-        def join_value(key):
-            """
-            Return the actual value (string) that belongs to the given key
-            """
-            # check if fixed value needs to be returned
-            if key[0] == "$":
-                return key[1:]
-            # if not fixed value then return the value that belongs to the
-            # given (nested) key(s)
-            res = self._get_field(key)
-            return "" if res is None else str(res)
+		def join_value(key):
+			"""
+			Return the actual value (string) that belongs to the given key
+			"""
+			# check if fixed value needs to be returned
+			if key[0] == "$":
+				return key[1:]
+			# if not fixed value then return the value that belongs to the
+			# given (nested) key(s)
+			res = self._get_field(key)
+			return "" if res is None else str(res)
 
-        if not isinstance(self.process_args, list):
-            raise ValueError("provided list of keys is not of type list")
+		if not isinstance(self.process_args, list):
+			raise ValueError("provided list of keys is not of type list")
 
-        seperator = ""
-        # set seperator if defined and remove it from the list of keys
-        if "$seperator" in self.process_args[0]:
-            seperator = self.process_args.pop(0)[-1]
+		seperator = ""
+		# set seperator if defined and remove it from the list of keys
+		if "$seperator" in self.process_args[0]:
+			seperator = self.process_args.pop(0)[-1]
 
-        try:
-            return seperator.join(
-                [join_value(key) for key in self.process_args]
-            ).strip()
-        except KeyError:
-            return None
+		try:
+			return seperator.join([join_value(key) for key in self.process_args]).strip()
+		except KeyError:
+			return None
 
-    def int_from_string(self):
-        """
-        returns the value represented in a string in a string format
-        """
-        seperators = self.process_args.get("seperators", False)
-        field_name = self.process_args.get("field_name", False)
-        if not (seperators and field_name):
-            return None
+	def int_from_string(self):
+		"""
+		returns the value represented in a string in a string format
+		"""
+		seperators = self.process_args.get("seperators", False)
+		field_name = self.process_args.get("field_name", False)
+		if not (seperators and field_name):
+			return None
 
-        field_value = self._get_field(field_name)
-        if not isinstance(field_value, str):
-            return None
+		field_value = self._get_field(field_name)
+		if not isinstance(field_value, str):
+			return None
 
-        for seperator in seperators:
-            field_value = field_value.replace(seperator, "")
+		for seperator in seperators:
+			field_value = field_value.replace(seperator, "")
 
-        return re.search(r"\d+", field_value).group()
+		return re.search(r"\d+", field_value).group()
 
-    def split_field(self):
-        """
-        Split the requested field and returns a specific entry from the split
-        result
-        """
-        seperator = self.process_args.get("seperator", False)
-        field_name = self.process_args.get("field_name", False)
-        index = self.process_args.get("index", False)
-        if not (seperator and field_name and (index is not False)):
-            return None
-        field_value = self._get_field(field_name)
-        try:
-            return field_value.split(seperator)[index]
-        except (IndexError, AttributeError):
-            return None
+	def split_field(self):
+		"""
+		Split the requested field and returns a specific entry from the split
+		result
+		"""
+		seperator = self.process_args.get("seperator", False)
+		field_name = self.process_args.get("field_name", False)
+		index = self.process_args.get("index", False)
+		if not (seperator and field_name and (index is not False)):
+			return None
+		field_value = self._get_field(field_name)
+		try:
+			return field_value.split(seperator)[index]
+		except (IndexError, AttributeError):
+			return None
 
-    def fixed_value(self):
-        """return the (fixed) value given in the conversion args"""
-        return self.process_args
+	def fixed_value(self):
+		"""return the (fixed) value given in the conversion args"""
+		return self.process_args
 
-    def get_value(self):
-        """calls the actual process command
+	def get_value(self):
+		"""calls the actual process command
 
-        first command is looked up in default commands.
-        If not found there it is looked up in custom commands
+		first command is looked up in default commands.
+		If not found there it is looked up in custom commands
 
-        """
-        if self.process_command in dir(self):
-            return getattr(self, self.process_command)()
+		"""
+		if self.process_command in dir(self):
+			return getattr(self, self.process_command)()
 
-        cust_command = self.process_command[1:]
-        cust_comm_class = self.add_process_commands.get(cust_command, None)
+		cust_command = self.process_command[1:]
+		cust_comm_class = self.add_process_commands.get(cust_command, None)
 
-        if cust_comm_class:
-            return cust_comm_class(self.record, self.process_args).convert()
+		if cust_comm_class:
+			return cust_comm_class(self.record, self.process_args).convert()
 
-        raise NotImplementedError(f"Field conversion command `{self.process_command}`")
+		raise NotImplementedError(f"Field conversion command `{self.process_command}`")
 
-    def _get_field(self, key, rec=None):
-        record = rec or self.record
+	def _get_field(self, key, rec=None):
+		record = rec or self.record
 
-        if key:
-            # key elemenets in nested keys are surround with "". For exmample
-            # key.example-1 becomes "key"."example-1".
-            # Needed for jmespath can hande special characters in the keys
-            nested_keys = key.split(".")
-            nested_key = ".".join(['"' + key + '"' for key in nested_keys])
-            try:
-                return jmespath.search(nested_key, record)
-            except ParseError:
-                pass
+		if key:
+			# key elemenets in nested keys are surround with "". For exmample
+			# key.example-1 becomes "key"."example-1".
+			# Needed for jmespath can hande special characters in the keys
+			nested_keys = key.split(".")
+			nested_key = ".".join(['"' + key + '"' for key in nested_keys])
+			try:
+				return jmespath.search(nested_key, record)
+			except ParseError:
+				pass
 
-        return None
+		return None

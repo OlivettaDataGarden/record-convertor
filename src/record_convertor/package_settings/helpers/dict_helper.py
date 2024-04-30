@@ -11,59 +11,63 @@ The module aims to facilitate the handling of data structures that are commonly 
 
 from typing import Any, Dict, List
 
-__all__ = ["list_in_lower_case", "keys_in_lower_case", "dict_without_non_values"]
+__all__ = [
+	"list_in_lower_case",
+	"keys_in_lower_case",
+	"dict_without_non_values",
+]
 
 
 def list_in_lower_case(input_record: List[Any]) -> List[Any]:
-    """
-    Recursively converts all dictionary keys within a list to lower case, including nested dictionaries and lists.
+	"""
+	Recursively converts all dictionary keys within a list to lower case, including nested dictionaries and lists.
 
-    Args:
-        input_record (List[Any]): A list potentially containing dictionaries, lists, and other data types.
+	Args:
+	    input_record (List[Any]): A list potentially containing dictionaries, lists, and other data types.
 
-    Returns:
-        List[Any]: A new list with dictionary keys in lower case within any nested structures.
-    """
-    result: List[Any] = []
-    for item in input_record:
-        if isinstance(item, list):
-            result.append(list_in_lower_case(item))
-        elif isinstance(item, dict):
-            result.append(keys_in_lower_case(item))
-        else:
-            result.append(item)
-    return result
+	Returns:
+	    List[Any]: A new list with dictionary keys in lower case within any nested structures.
+	"""
+	result: List[Any] = []
+	for item in input_record:
+		if isinstance(item, list):
+			result.append(list_in_lower_case(item))
+		elif isinstance(item, dict):
+			result.append(keys_in_lower_case(item))
+		else:
+			result.append(item)
+	return result
 
 
 def keys_in_lower_case(input_record: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Recursively converts all keys in a dictionary to lower case, including keys in nested dictionaries and lists.
+	"""
+	Recursively converts all keys in a dictionary to lower case, including keys in nested dictionaries and lists.
 
-    Args:
-        input_record (Dict[str, Any]): The dictionary to be processed, potentially containing nested dictionaries and lists.
+	Args:
+	    input_record (Dict[str, Any]): The dictionary to be processed, potentially containing nested dictionaries and lists.
 
-    Returns:
-        Dict[str, Any]: A new dictionary with all keys in lower case, including within nested structures.
-    """
-    dict_result: Dict[str, Any] = {}
-    for key, value in input_record.items():
-        if isinstance(value, list):
-            dict_result[key.lower()] = list_in_lower_case(value)
-        elif isinstance(value, dict):
-            dict_result[key.lower()] = keys_in_lower_case(value)
-        else:
-            dict_result[key.lower()] = value
-    return dict_result
+	Returns:
+	    Dict[str, Any]: A new dictionary with all keys in lower case, including within nested structures.
+	"""
+	dict_result: Dict[str, Any] = {}
+	for key, value in input_record.items():
+		if isinstance(value, list):
+			dict_result[key.lower()] = list_in_lower_case(value)
+		elif isinstance(value, dict):
+			dict_result[key.lower()] = keys_in_lower_case(value)
+		else:
+			dict_result[key.lower()] = value
+	return dict_result
 
 
 def dict_without_non_values(input_dict: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Removes key-value pairs from a dictionary where the value is None.
+	"""
+	Removes key-value pairs from a dictionary where the value is None.
 
-    Args:
-        input_dict (Dict[str, Any]): The dictionary to be processed.
+	Args:
+	    input_dict (Dict[str, Any]): The dictionary to be processed.
 
-    Returns:
-        Dict[str, Any]: A new dictionary with all None values removed.
-    """
-    return {k: v for k, v in input_dict.items() if v is not None}
+	Returns:
+	    Dict[str, Any]: A new dictionary with all None values removed.
+	"""
+	return {k: v for k, v in input_dict.items() if v is not None}

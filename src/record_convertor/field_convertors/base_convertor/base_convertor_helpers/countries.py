@@ -11,19 +11,19 @@ __all__ = ["iso3116_from_alpha_3_country_code"]
 
 
 def iso3116_from_alpha_3_country_code(alpha_3: str) -> str:
-    """Returns iso3116 country code from alph3 country code
+	"""Returns iso3116 country code from alph3 country code
 
-    Args:
-        alpha_3 (str): alpha3 country code
+	Args:
+	    alpha_3 (str): alpha3 country code
 
-    Returns:
-        str: iso3116 country code
-    """
-    return next(
-        (
-            country["let2"]
-            for country in ALL_COUNTRY_CODES
-            if country["let3"] == alpha_3.upper()
-        ),
-        "",
-    )
+	Returns:
+	    str: iso3116 country code
+	"""
+	return next(
+		(
+			country["let2"]
+			for country in ALL_COUNTRY_CODES
+			if country["let3"] == alpha_3.upper()
+		),
+		"",
+	)

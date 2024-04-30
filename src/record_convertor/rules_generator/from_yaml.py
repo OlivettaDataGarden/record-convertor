@@ -12,85 +12,86 @@ from yaml.scanner import ScannerError
 
 
 class RulesFromYAML:
-    """
-    Class to create a rule dictionary from a YAML file.
+	"""
+	Class to create a rule dictionary from a YAML file.
 
-    This class reads a YAML file and converts it into a dictionary. It includes
-    error handling for YAML syntax issues and provides access to the resulting
-    dictionary through a property.
+	This class reads a YAML file and converts it into a dictionary. It includes
+	error handling for YAML syntax issues and provides access to the resulting
+	dictionary through a property.
 
-    Attributes:
-        RULE_SOURCE_TYPE (str): Type hint for the rule source file name.
+	Attributes:
+	    RULE_SOURCE_TYPE (str): Type hint for the rule source file name.
 
-    Parameters:
-        rule_source (RULE_SOURCE_TYPE): The filename, including path, of the YAML file.
+	Parameters:
+	    rule_source (RULE_SOURCE_TYPE): The filename, including path, of the YAML file.
 
-    Raises:
-        ValueError: If trying to access the rules property when the YAML file
-                    has been invalidated due to an exception.
+	Raises:
+	    ValueError: If trying to access the rules property when the YAML file
+	                has been invalidated due to an exception.
 
-    Properties:
-        rules (dict): Returns a dictionary representation of the YAML file.
-    """
+	Properties:
+	    rules (dict): Returns a dictionary representation of the YAML file.
+	"""
 
-    RULE_SOURCE_TYPE = str
+	RULE_SOURCE_TYPE = str
 
-    def __init__(self, rule_source: RULE_SOURCE_TYPE):
-        """
-        Initializes the RulesFromYAML object with a YAML file source.
+	def __init__(self, rule_source: RULE_SOURCE_TYPE):
+		"""
+		Initializes the RulesFromYAML object with a YAML file source.
 
-        Args:
-            rule_source (RULE_SOURCE_TYPE): The filename, including path, of the YAML file.
-        """
-        self._rule_source = rule_source
-        self._dict: Dict = {}
-        self._error: Union[bool, str] = False
-        self._convert_rule_source_to_rule_dict()
+		Args:
+		    rule_source (RULE_SOURCE_TYPE): The filename, including path, of the YAML file.
+		"""
+		self._rule_source = rule_source
+		self._dict: Dict = {}
+		self._error: Union[bool, str] = False
+		self._convert_rule_source_to_rule_dict()
 
-    @property
-    def rules(self) -> Dict:
-        """
-        Gets the dictionary formed from the YAML file.
+	@property
+	def rules(self) -> Dict:
+		"""
+		Gets the dictionary formed from the YAML file.
 
-        This property provides access to the dictionary representation of the
-        YAML file, ensuring that the file has been successfully parsed without
-        errors.
+		This property provides access to the dictionary representation of the
+		YAML file, ensuring that the file has been successfully parsed without
+		errors.
 
-        Returns:
-            dict: The dictionary containing the rules from the YAML file.
+		Returns:
+		    dict: The dictionary containing the rules from the YAML file.
 
-        Raises:
-            ValueError: If the YAML file contains errors or cannot be parsed.
-        """
-        if self._error:
-            raise ValueError(
-                f"Attempting to access rules property failed due to an error in the YAML file: {self._error}"
-            )
+		Raises:
+		    ValueError: If the YAML file contains errors or cannot be parsed.
+		"""
+		if self._error:
+			raise ValueError(
+				"Attempting to access rules property failed due to an error",
+				f" in the YAML file: {self._error}",
+			)
 
-        return self._dict
+		return self._dict
 
-    def _convert_rule_source_to_rule_dict(self) -> None:
-        """
-        Converts the YAML file to a dictionary.
+	def _convert_rule_source_to_rule_dict(self) -> None:
+		"""
+		Converts the YAML file to a dictionary.
 
-        This method attempts to parse the YAML file specified by the rule_source
-        attribute and convert it into a dictionary. If the YAML file cannot be
-        parsed, the _error attribute is set with the error message.
-        """
-        try:
-            with open(self._rule_source, "r") as file:
-                self._dict = yaml.load(file, Loader=yaml.FullLoader)
-        except ScannerError as error:
-            self._error = str(error)
+		This method attempts to parse the YAML file specified by the rule_source
+		attribute and convert it into a dictionary. If the YAML file cannot be
+		parsed, the _error attribute is set with the error message.
+		"""
+		try:
+			with open(self._rule_source, "r") as file:
+				self._dict = yaml.load(file, Loader=yaml.FullLoader)
+		except ScannerError as error:
+			self._error = str(error)
 
-    @property
-    def _filename(self) -> str:
-        """
-        The filename of the YAML source file.
+	@property
+	def _filename(self) -> str:
+		"""
+		The filename of the YAML source file.
 
-        This property is a convenience for accessing the rule source file name.
+		This property is a convenience for accessing the rule source file name.
 
-        Returns:
-            str: The filename of the YAML source file.
-        """
-        return self._rule_source
+		Returns:
+		    str: The filename of the YAML source file.
+		"""
+		return self._rule_source

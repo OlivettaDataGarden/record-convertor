@@ -17,14 +17,14 @@ import jmespath
 from jmespath.exceptions import ParseError
 
 from .package_settings import (
-    EvaluateConditions,
-    keys_in_lower_case,
-    RecConvKeys,
-    SkipConvKeys,
-    SkipRuleDict,
-    FieldConvertorProtocol,
-    DateFormatProtocol,
-    RulesDict,
+	EvaluateConditions,
+	keys_in_lower_case,
+	RecConvKeys,
+	SkipConvKeys,
+	SkipRuleDict,
+	FieldConvertorProtocol,
+	DateFormatProtocol,
+	RulesDict,
 )
 from .rules_generator import RulesFromYAML
 
@@ -32,127 +32,127 @@ from .field_convertors import BaseFieldConvertor, DateFieldConvertor
 
 
 class RecordConvertor:
-    RULE_CLASS = RulesFromYAML
-    EVALUATE_CLASS = EvaluateConditions
-    KEYS_IN_LOWER_CASE: bool = False
-    DEFAULT_VALUE: dict = {}
-    DEFAULT_FIELD_CONVERTOR_CLASS: type[FieldConvertorProtocol] = BaseFieldConvertor
-    DEFAULT_DATE_FORMAT_CLASS: type[DateFormatProtocol] = DateFieldConvertor
-    _stored_copy: Optional["RecordConvertor"] = None
+	RULE_CLASS = RulesFromYAML
+	EVALUATE_CLASS = EvaluateConditions
+	KEYS_IN_LOWER_CASE: bool = False
+	DEFAULT_VALUE: dict = {}
+	DEFAULT_FIELD_CONVERTOR_CLASS: type[FieldConvertorProtocol] = BaseFieldConvertor
+	DEFAULT_DATE_FORMAT_CLASS: type[DateFormatProtocol] = DateFieldConvertor
+	_stored_copy: Optional["RecordConvertor"] = None
 
-    def __init__(
-        self,
-        rule_source: RULE_CLASS.RULE_SOURCE_TYPE,
-        field_convertor: Optional[type[FieldConvertorProtocol]] = None,
-        date_formatter: Optional[type[DateFormatProtocol]] = None,
-    ):
-        self._rules = self.RULE_CLASS(rule_source=rule_source).rules
-        # set instance of given or default field convertor class
-        self._field_convertor: FieldConvertorProtocol = (
-            field_convertor or self.DEFAULT_FIELD_CONVERTOR_CLASS
-        )()
-        # set instance of given or default date format class
-        self._date_formatter: DateFormatProtocol = (
-            date_formatter or self.DEFAULT_DATE_FORMAT_CLASS
-        )()
+	def __init__(
+		self,
+		rule_source: RULE_CLASS.RULE_SOURCE_TYPE,
+		field_convertor: Optional[type[FieldConvertorProtocol]] = None,
+		date_formatter: Optional[type[DateFormatProtocol]] = None,
+	):
+		self._rules = self.RULE_CLASS(rule_source=rule_source).rules
+		# set instance of given or default field convertor class
+		self._field_convertor: FieldConvertorProtocol = (
+			field_convertor or self.DEFAULT_FIELD_CONVERTOR_CLASS
+		)()
+		# set instance of given or default date format class
+		self._date_formatter: DateFormatProtocol = (
+			date_formatter or self.DEFAULT_DATE_FORMAT_CLASS
+		)()
 
-    def convert(self, record: dict) -> dict:
-        """
-        Primary public method to run the actual conversion of the record.
+	def convert(self, record: dict) -> dict:
+		"""
+		Primary public method to run the actual conversion of the record.
 
-        Args:
-            record (dict): input record
+		Args:
+		    record (dict): input record
 
-        Returns:
-            dict: converted record
-        """
-        output_record = {}
-        self._record = keys_in_lower_case(record) if self.KEYS_IN_LOWER_CASE else record
+		Returns:
+		    dict: converted record
+		"""
+		output_record = {}
+		self._record = keys_in_lower_case(record) if self.KEYS_IN_LOWER_CASE else record
 
-        # process all rules (and nested rules)
-        for rule in self._rules.items():
-            # check if the rule determines that the given record can be skipped
-            # if so return default value
-            if self._skip_this_record(rule):
-                return self.DEFAULT_VALUE
+		# process all rules (and nested rules)
+		for rule in self._rules.items():
+			# check if the rule determines that the given record can be skipped
+			# if so return default value
+			if self._skip_this_record(rule):
+				return self.DEFAULT_VALUE
 
-            # check if the rule requires a change on the input record to be done
-            # if rule is an input record update rule then proceed with the next rule.
-            if self._change_field_in_input_record_if_required(rule=rule):
-                continue
+			# check if the rule requires a change on the input record to be done
+			# if rule is an input record update rule then proceed with the next rule.
+			if self._change_field_in_input_record_if_required(rule=rule):
+				continue
 
-        return output_record
+		return output_record
 
-    def get_record_convertor_copy_with_new_rules(
-        self, new_rules: RulesDict
-    ) -> "RecordConvertor":
-        """Return as copy of the current record convertor instance with new conversion rules."""
-        new_record_convertor = self._copy
-        new_record_convertor._rules = new_rules
-        return new_record_convertor
+	def get_record_convertor_copy_with_new_rules(
+		self, new_rules: RulesDict
+	) -> "RecordConvertor":
+		"""Return as copy of the current record convertor instance with new conversion rules."""
+		new_record_convertor = self._copy
+		new_record_convertor._rules = new_rules
+		return new_record_convertor
 
-    @property
-    def _copy(self) -> "RecordConvertor":
-        # prevent from creating class copy everytime a _copy method is called
-        # by storing the first copy in the _stored_copy attribute
-        if not self._stored_copy:
-            self._stored_copy = copy(self)
-        return self._stored_copy
+	@property
+	def _copy(self) -> "RecordConvertor":
+		# prevent from creating class copy everytime a _copy method is called
+		# by storing the first copy in the _stored_copy attribute
+		if not self._stored_copy:
+			self._stored_copy = copy(self)
+		return self._stored_copy
 
-    def _change_field_in_input_record_if_required(self, rule: tuple) -> bool:
-        """
-        Checks if input record needs to be updated based upon the given.
-        If so update is performed.
+	def _change_field_in_input_record_if_required(self, rule: tuple) -> bool:
+		"""
+		Checks if input record needs to be updated based upon the given.
+		If so update is performed.
 
-        Returns True if the rule is an input record update rule and false otherwise.
-        """
-        # check if the rule triggers a field conversion in the input record
-        if self._convert_field_rule(rule):
-            _, rule_dict = rule
-            self._record = self._field_convertor.convert_field(
-                record=self._record, conversion_rule=rule_dict
-            )
-            return True
+		Returns True if the rule is an input record update rule and false otherwise.
+		"""
+		# check if the rule triggers a field conversion in the input record
+		if self._convert_field_rule(rule):
+			_, rule_dict = rule
+			self._record = self._field_convertor.convert_field(
+				record=self._record, conversion_rule=rule_dict
+			)
+			return True
 
-        # check if the rule triggers a field date conversion in the input record
-        if self._format_date_rule(rule):
-            _, rule_dict = rule
-            self._record = self._date_formatter.format_date_field(
-                record=self._record, conversion_rule=rule_dict
-            )
-            return True
+		# check if the rule triggers a field date conversion in the input record
+		if self._format_date_rule(rule):
+			_, rule_dict = rule
+			self._record = self._date_formatter.format_date_field(
+				record=self._record, conversion_rule=rule_dict
+			)
+			return True
 
-        return False
+		return False
 
-    def _convert_field_rule(self, rule: tuple) -> bool:
-        rule_key, _ = rule
-        return "$convert" in rule_key
+	def _convert_field_rule(self, rule: tuple) -> bool:
+		rule_key, _ = rule
+		return "$convert" in rule_key
 
-    def _format_date_rule(self, rule: tuple) -> bool:
-        rule_key, _ = rule
-        return "$format_date" in rule_key
+	def _format_date_rule(self, rule: tuple) -> bool:
+		rule_key, _ = rule
+		return "$format_date" in rule_key
 
-    def _skip_this_record(self, rule: tuple) -> bool:
-        rule_key, rule_value = rule
-        if not rule_key.lower() == RecConvKeys.SKIP:
-            return False
-        skip_rule: SkipRuleDict = rule_value
-        conditions = skip_rule.get(SkipConvKeys.CONDITION)
-        fieldname = skip_rule.get(SkipConvKeys.FIELDNAME)
-        field_value = self._get_field(fieldname)
+	def _skip_this_record(self, rule: tuple) -> bool:
+		rule_key, rule_value = rule
+		if not rule_key.lower() == RecConvKeys.SKIP:
+			return False
+		skip_rule: SkipRuleDict = rule_value
+		conditions = skip_rule.get(SkipConvKeys.CONDITION)
+		fieldname = skip_rule.get(SkipConvKeys.FIELDNAME)
+		field_value = self._get_field(fieldname)
 
-        return self.EVALUATE_CLASS(conditions, field_value).evaluate()
+		return self.EVALUATE_CLASS(conditions, field_value).evaluate()
 
-    def _get_field(self, key: Optional[str]) -> Any:
-        if key:
-            # key elemenets in nested keys are surround with "". For exmample
-            # key.example-1 becomes "key"."example-1".
-            # Needed for jmespath can hande special characters in the keys
-            nested_keys = key.split(".")
-            nested_key = ".".join(['"' + key + '"' for key in nested_keys])
-            try:
-                return jmespath.search(nested_key, self._record)
-            except ParseError:
-                pass
+	def _get_field(self, key: Optional[str]) -> Any:
+		if key:
+			# key elemenets in nested keys are surround with "". For exmample
+			# key.example-1 becomes "key"."example-1".
+			# Needed for jmespath can hande special characters in the keys
+			nested_keys = key.split(".")
+			nested_key = ".".join(['"' + key + '"' for key in nested_keys])
+			try:
+				return jmespath.search(nested_key, self._record)
+			except ParseError:
+				pass
 
-        return None
+		return None
