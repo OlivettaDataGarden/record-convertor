@@ -1,16 +1,18 @@
-import pytest
-from dataclasses import dataclass
 from copy import deepcopy
+from dataclasses import dataclass
+
+import pytest
+
 from record_convertor.dataclass_processor import DataClassProcessor
-from record_convertor.package_settings import DataClassRuleKeys, DataClassRuleDict
+from record_convertor.package_settings import DataClassRuleDict, DataClassRuleKeys
 
 
 @dataclass
-class DataClassTest: ...
+class DataClassTest: ...  # noqa: E701
 
 
 @dataclass
-class DataClassTestTwo: ...
+class DataClassTestTwo: ...  # noqa: E701
 
 
 base_data_class_rule: DataClassRuleDict = {
@@ -27,10 +29,10 @@ def test_dataclass_processor_class_exists():
 
 
 def test_dataclass_processor_raises_exception_for_non_dataclass():
-    class TestClass: ...
+    class TestClass: ...  # noqa: E701
 
     with pytest.raises(ValueError):
-        DataClassProcessor().register_dataclass(TestClass)
+        DataClassProcessor().register_dataclass(TestClass)  # type: ignore
 
 
 def test_private_register_dataclass_method_adds_a_dataclass_to_the_class():
@@ -41,18 +43,19 @@ def test_private_register_dataclass_method_adds_a_dataclass_to_the_class():
     data_class_processor = DataClassProcessor()
     data_class_processor._register_dataclass("test_class", DataClassTest)
     assert "test_class" in dir(data_class_processor)
-    assert getattr(data_class_processor, "test_class") is DataClassTest
+    assert getattr(data_class_processor, "test_class") is DataClassTest  # noqa: B009
 
 
-def test_register_dataclass_method_adds_an_attribute_in_snake_case_holding_the_dataclass_processor():
+def test_reg_dc_method_adds_attribute_in_snake_case_holding_the_dataclass_processor():
     """
-    Test the public method register_dataclass adds a dataclass as an attribute to the dataclass
-    processor where the attribute name is the same as the added dataclass name but then in snakecase.
+    Test the public method register_dataclass adds a dataclass as an attribute to the
+    dataclass processor where the attribute name is the same as the added dataclass
+    name but then in snakecase.
     """
     data_class_processor = DataClassProcessor()
     data_class_processor.register_dataclass(DataClassTest)
     assert "data_class_test" in dir(data_class_processor)
-    assert getattr(data_class_processor, "data_class_test") is DataClassTest
+    assert getattr(data_class_processor, "data_class_test") is DataClassTest  # noqa: B009, E501
 
 
 def test_register_data_classes_method_adds_multiple_attributes():
@@ -65,8 +68,8 @@ def test_register_data_classes_method_adds_multiple_attributes():
     data_class_processor.register_data_classes([DataClassTest, DataClassTestTwo])
     assert "data_class_test" in dir(data_class_processor)
     assert "data_class_test_two" in dir(data_class_processor)
-    assert getattr(data_class_processor, "data_class_test") is DataClassTest
-    assert getattr(data_class_processor, "data_class_test_two") is DataClassTestTwo
+    assert getattr(data_class_processor, "data_class_test") is DataClassTest  # noqa: B009, E501
+    assert getattr(data_class_processor, "data_class_test_two") is DataClassTestTwo  # noqa: B009, E501
 
 
 def test_register_dict_of_data_classes_method():
@@ -84,8 +87,8 @@ def test_register_dict_of_data_classes_method():
     data_class_processor.register_dict_of_data_classes(dict_of_data_classes)
     assert "dataclassone" in dir(data_class_processor)
     assert "datackasstwo" in dir(data_class_processor)
-    assert getattr(data_class_processor, "dataclassone") is DataClassTest
-    assert getattr(data_class_processor, "datackasstwo") is DataClassTestTwo
+    assert getattr(data_class_processor, "dataclassone") is DataClassTest  # noqa: B009
+    assert getattr(data_class_processor, "datackasstwo") is DataClassTestTwo  # noqa: B009, E501
 
 
 def test_dataclass_name_setter_method():

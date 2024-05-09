@@ -1,5 +1,5 @@
+from record_convertor import EvaluateConditions, RecordConvertor
 from record_convertor.package_settings import BaseRuleDict, FormatDateRuleDict
-from record_convertor import RecordConvertor, EvaluateConditions
 
 TEST_RULE = {"fieldname": "field1", "actions": []}
 SKIP_RULE = {"fieldname": "field1", "condition": {"does_not_equal": "test"}}
@@ -66,21 +66,30 @@ def basic_test_convertor(
 
 
 def test_record_convertor_class_exits():
-    """Tests the existence of the `RecordConvertor` class to ensure it is correctly defined and importable."""
+    """
+    Tests the existence of the `RecordConvertor` class to ensure it is correctly
+    defined and importable.
+    """
     assert RecordConvertor
 
 
 def test_record_convertor_sets_rules_source():
-    """Tests that instances (subclasses of) `RecordConvertor` class correctly sets and utilizes the `_rules` attribute."""
+    """
+    Tests that instances (subclasses of) `RecordConvertor` class correctly sets and
+    utilizes the `_rules` attribute.
+    """
     record_covertor = basic_test_convertor(rule_class=RuleConvertorTest)
     assert isinstance(record_covertor, RecordConvertor)
     assert basic_test_convertor()._rules == RuleConvertorTest(rule_source="").rules
 
 
 def test_record_convertor_sets_field_convertor():
-    """Tests that the `RecordConvertorTest` class correctly sets and utilizes the `_rules` attribute."""
+    """
+    Tests that the `RecordConvertorTest` class correctly sets and utilizes the `_rules`
+    attribute.
+    """
 
-    class TestFieldConvertor: ...
+    class TestFieldConvertor: ...  # NOQA : E701
 
     class RecordConvertorTest(RecordConvertor):
         RULE_CLASS = RuleConvertorTest
@@ -91,9 +100,9 @@ def test_record_convertor_sets_field_convertor():
     )
 
 
-######################################################
-#### Test the set record keys to lower case logic ####
-######################################################
+################################################
+# Test the set record keys to lower case logic #
+################################################
 
 
 def test_record_convert_sets_keys_to_lower_case():
@@ -114,9 +123,9 @@ def test_record_convert_does_not_set_keys_to_lower_case_by_default():
     assert record_convertor._record == {"KEY1": 1}
 
 
-####################################
-#### Test the skip record logic ####
-####################################
+##############################
+# Test the skip record logic #
+##############################
 
 
 def test_skip_method_returns_false_if_skip_not_in_key():
@@ -135,9 +144,9 @@ def test_skip_method_returns_false_if_skip_in_key_and_confition_is_false():
     assert not record_convertor._skip_this_record(rule=("$SKIP", SKIP_RULE))
 
 
-#################################################
-#### Test the _convert_field in record logic ####
-#################################################
+###########################################
+# Test the _convert_field in record logic #
+###########################################
 
 
 def test_field_convert_method_changes_the_input_record_with_convert_key():
@@ -160,9 +169,9 @@ def test_field_convert_method_no_change_of_input_without_convert_key():
     assert record_convertor._record == {"input": "input value"}
 
 
-#################################################
-#### Test the _convert_field in record logic ####
-#################################################
+###########################################
+# Test the _convert_field in record logic #
+###########################################
 
 
 def test_format_date_method_changes_input_record_with_format_date_key():
@@ -185,9 +194,9 @@ def test_format_date_method_leaves_input_as_is_without_convert_key():
     assert record_convertor._record == {"date1": "date1"}
 
 
-###################################################################
-#### Test the get_record_convertor_copy_with_new_rules  method ####
-###################################################################
+#############################################################
+# Test the get_record_convertor_copy_with_new_rules  method #
+#############################################################
 
 
 def test_record_convertor_with_new_rules_from_dict_sets_new_rules():
@@ -203,7 +212,7 @@ def test_record_convertor_with_new_rules_from_dict_sets_new_rules():
     assert new_record_convertor._rules == {"new_rule1": "rule value1"}
 
 
-def test_record_convertor_with_new_rules_from_dict_sets_leaves_all_other_attributes_as_is():
+def test_rec_convt_with_new_rules_from_dict_sets_leaves_all_other_attributes_as_is():
     """
     Test that the method get_record_convertor_copy_with_new_rules returns a copy of
     the record convertor with only the rules changed to the given new rules

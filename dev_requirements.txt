@@ -4,6 +4,8 @@ tox
 pre-commit
 pytest
 isort
+mypy
+types-PyYAML
 
 #package requirements
 jmespath

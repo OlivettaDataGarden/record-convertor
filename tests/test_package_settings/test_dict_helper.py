@@ -32,7 +32,8 @@ def test_nested_lists_returned_in_lower_case():
 def test_list_nested_keys_returned_in_lower_case():
     """
     Test that keys in dictionaries nested within a list are converted to lower case.
-    This includes testing dictionaries directly within the list and nested within other dictionaries.
+    This includes testing dictionaries directly within the list and nested within other
+    dictionaries.
     """
     test_list = [
         {"KEY1": {"NESTED_KEY1": "VALUE"}},

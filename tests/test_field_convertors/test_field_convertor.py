@@ -4,10 +4,8 @@ from copy import deepcopy
 from datetime import date, datetime, timedelta
 
 import pytest
-from data.test_data_field_convertor import (
-    URL_PARAMS,
+from data.data_field_convertor_tests import (
     BASE_PARAMS_SELECT_FROM_LIST,
-    URL_PARAMS_WITH_CONDITION,
     PARAMS_ADD_DATA_FROM_DICT,
     PARAMS_ADD_KEY_VALUE_FROM_FIELD,
     PARAMS_ADD_KEY_VALUE_FROM_FIELD2,
@@ -42,10 +40,11 @@ from data.test_data_field_convertor import (
     PARAMS_TO_LOWER_STR,
     PARAMS_TO_STR,
     PARAMS_TO_UPPER_STR,
+    URL_PARAMS,
+    URL_PARAMS_WITH_CONDITION,
 )
 
 from record_convertor.field_convertors import BaseFieldConvertor
-
 
 convertor = BaseFieldConvertor()
 
@@ -54,14 +53,6 @@ def test_remove_params_from_url_conversion_1():
     """test request params are removed from url"""
     converted_record = convertor.convert_field(**deepcopy(URL_PARAMS))
     assert converted_record["url"] == "www.test.com/"
-
-
-# def test_remove_params_from_url_conversion_2():
-#     """
-#     test remove params returns url without also when no url has no params
-#     """
-#     converted_record = convertor.convert_field(**{"record": {"url": "www.urlwithout.params/"}})
-#     assert converted_record["url"] == "www.urlwithout.params/"
 
 
 def test_convert_condition_met():
@@ -230,7 +221,7 @@ def test_add_data_from_dict():
     """
     test add a antries from a dict to another field
     """
-    converted_record = convertor.convert_field(**deepcopy(PARAMS_ADD_DATA_FROM_DICT))  # type: ignore
+    converted_record = convertor.convert_field(**deepcopy(PARAMS_ADD_DATA_FROM_DICT))  # type: ignore # NOQA: E501
     assert converted_record["to_field"] == {"1": 1, "2": 2, "0": 0}
 
 
@@ -323,7 +314,7 @@ def test_remove_nested_field():
     """
     test removing a field
     """
-    converted_record = convertor.convert_field(**deepcopy(PARAMS_REMOVE_NESTED_FIELD))  # type: ignore
+    converted_record = convertor.convert_field(**deepcopy(PARAMS_REMOVE_NESTED_FIELD))  # type: ignore # NOQA: E501
     assert converted_record["nested"].get("removed_field", None) is None
 
 
