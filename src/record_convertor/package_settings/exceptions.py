@@ -20,3 +20,13 @@ class ProcessArgsMustBeOfTypeDict(Exception):
         super().__init__(
             f"process_args must be of type <dict> but is of type `{type(process_args)}"
         )
+
+
+class FormatNotImplementedException(Exception):
+    def __init__(self, format: str):
+        super().__init__(f"Requested format {format} not implememted.")
+
+
+class NoDateFieldException(Exception):
+    def __init__(self):
+        super().__init__("No input for dateformat provided in the ruleset.")

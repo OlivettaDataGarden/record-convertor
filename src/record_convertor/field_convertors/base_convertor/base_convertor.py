@@ -143,12 +143,10 @@ class BaseFieldConvertor:
     ) -> dict:
         self.record = record
         self.conversion_rule = conversion_rule
-        self.field_name = conversion_rule.get(BaseConvertorKeys.FIELDNAME.value)
-        if not self.field_name:
-            raise ValueError("Fieldname not provided in conversion rule")
+        self.field_name = conversion_rule[BaseConvertorKeys.FIELDNAME]
         self.field_value = self._get_field(self.field_name)
 
-        actions = self.conversion_rule[BaseConvertorKeys.ACTIONS.value] or {}
+        actions = self.conversion_rule[BaseConvertorKeys.ACTIONS] or {}
         if self.all_conditions_true():
             for action_dict in actions:
                 [[action, action_value]] = action_dict.items()
@@ -210,12 +208,16 @@ class BaseFieldConvertor:
         self.pop_nested_field(self.field_name)
         return None
 
-    def list_to_dict(self, action_value):
+    def list_to_dict(self, action_value) -> dict:
         """turns [[a,b] [c,d]] into {a:b, c:d}"""
-        return {
-            normalize_string(item[0]).replace(" ", "_"): normalize_string(item[1])
-            for item in self.field_value
-        }
+        return (
+            {}
+            if not self.field_value
+            else {
+                normalize_string(item[0]).replace(" ", "_"): normalize_string(item[1])
+                for item in self.field_value
+            }
+        )
 
     def change_key_name_to(self, action_value):
         """change the field name of a (nested) field"""
@@ -269,12 +271,15 @@ class BaseFieldConvertor:
             result.update(update_dict)
         return result
 
-    def add_data_from_list_of_dict(self, action_value):
+    def add_data_from_list_of_dict(self, action_value) -> dict:
         """
         Return a dict with key, value pairs from a list of dicts.
         [{'key': 'a', 'value': 'b'}, {'key': 'c', 'value': 'd'}] =>
         {'a': 'b', 'c': 'd'}
         """
+        if not self.field_value:
+            return {}
+
         key_key = action_value.get("key_key")
         value_key = action_value.get("value_key")
         if not (key_key and value_key):
@@ -286,8 +291,11 @@ class BaseFieldConvertor:
             result.update({key: value})
         return result
 
-    def convert_data_from_html_fragment_to_list(self, action_value):
+    def convert_data_from_html_fragment_to_list(self, action_value) -> list:
         """Returns a list of data elemens found in html snippet."""
+        if not self.field_value:
+            return []
+
         return DataFromHTMLSnippet().to_list(self.field_value)
 
     def add_prefix(self, action_value):
@@ -319,15 +327,19 @@ class BaseFieldConvertor:
         """returns the string version of provided attribute in uppercase"""
         return str(self.field_value).upper()
 
-    def days_ago_to_date(self, action_value):
+    def days_ago_to_date(self, action_value) -> Optional[str]:
         """returns the date of a given number of days ago
 
         date is returned in format YYYY-MM-DD
         """
+        if not self.field_value:
+            return None
+
         try:
             actual_date = date.today() - timedelta(days=int(self.field_value))
         except ValueError:
             return None
+
         return date.strftime(actual_date, "%Y-%m-%d")
 
     def remove_params_from_url(self, action_value):
@@ -335,15 +347,14 @@ class BaseFieldConvertor:
         if isinstance(self.field_value, str):
             return self.field_value.split("?")[0]
 
-    def select_object_from_list(self, action_value):
+    def select_object_from_list(self, action_value: tuple[str, Any]):
         """
         selects an object from a list if specific key in the object equals a
         given value
         """
-
         key, value = action_value
         try:
-            for obj in self.field_value:
+            for obj in self.field_value or []:
                 if self._get_field(key, obj) == value:
                     return obj
         except TypeError:
@@ -371,7 +382,7 @@ class BaseFieldConvertor:
 
     def all_conditions_true(self) -> bool:
         """Returns True if all provided conditions are satisfied"""
-        if conditions := self.conversion_rule.get(BaseConvertorKeys.CONDITION.value):
+        if conditions := self.conversion_rule.get(BaseConvertorKeys.CONDITION):
             return EvaluateConditions(
                 provided_conditions=conditions, value=self.field_value
             ).evaluate()

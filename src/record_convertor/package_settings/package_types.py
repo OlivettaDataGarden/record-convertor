@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Optional, TypedDict, Union
+from typing import Literal, Optional, TypedDict, Union
 
 from .conditions import ConditionsDict
 
@@ -18,39 +18,39 @@ __all__ = [
 
 
 class RecConvKeys:
-    SKIP = "$skip"
-    CONVERT = "$convert"
+    SKIP: Literal["$skip"] = "$skip"
+    CONVERT: Literal["$convert"] = "$convert"
 
 
-class BaseConvertorKeys(Enum):
-    CONDITION = "condition"
-    FIELDNAME = "fieldname"
-    ACTIONS = "actions"
-    ACTIONTYPE = "action_type"
-    ACTIONVALUE = "action_value"
+class BaseConvertorKeys:
+    CONDITION: Literal["condition"] = "condition"
+    FIELDNAME: Literal["fieldname"] = "fieldname"
+    ACTIONS: Literal["actions"] = "actions"
+    ACTIONTYPE: Literal["action_type"] = "action_type"
+    ACTIONVALUE: Literal["action_value"] = "action_value"
 
 
-class FormatDateConvKeys(Enum):
-    CONDITION = "condition"
-    FORMAT = "format"
-    DATEFIELD = "date_field"
+class FormatDateConvKeys:
+    CONDITION: Literal["condition"] = "condition"
+    FORMAT: Literal["format"] = "format"
+    DATEFIELD: Literal["date_field"] = "date_field"
 
 
-class SkipConvKeys(Enum):
-    CONDITION = "condition"
-    FIELDNAME = "fieldname"
+class SkipConvKeys:
+    CONDITION: Literal["condition"] = "condition"
+    FIELDNAME: Literal["fieldname"] = "fieldname"
 
 
 class DataClassRuleKeys:
-    NAME = "data_class_name"
-    RECORD_CONVERSION_ARGUMENTS = "params"
-    METHODS = "methods"
+    NAME: Literal["data_class_name"] = "data_class_name"
+    RECORD_CONVERSION_ARGUMENTS: Literal["params"] = "params"
+    METHODS: Literal["methods"] = "methods"
 
 
 class BaseRuleDict(TypedDict):
     condition: Optional[ConditionsDict]
     format: Optional[str]  # used by date convertor
-    fieldname: Optional[str]
+    fieldname: str
     actions: Optional[dict]
     action_type: Optional[str]  # tbd if these are still needed
     action_value: Union[str, dict]  # tbd if these are still needed

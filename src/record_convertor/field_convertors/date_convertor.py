@@ -33,6 +33,7 @@ from ..package_settings import (
     EvaluateConditions,
     FormatDateConvKeys,
     FormatDateRuleDict,
+    FormatNotImplementedException,
 )
 
 __all__ = ["DateFieldConvertor"]
@@ -177,7 +178,7 @@ class DateFieldConvertor:
         self, date_field_value: str, conversion_rule: FormatDateRuleDict
     ) -> bool:
         """Returns True if all provided conditions are satisfied."""
-        conditions = conversion_rule.get(FormatDateConvKeys.CONDITION.value, False)
+        conditions = conversion_rule.get(FormatDateConvKeys.CONDITION)
         if not conditions:
             return True
 
@@ -219,13 +220,11 @@ class DateFieldConvertor:
 
     @staticmethod
     def _get_date_field_key_name(rule: FormatDateRuleDict) -> str:
-        date_field_in_record = rule.get(FormatDateConvKeys.DATEFIELD.value)
-
+        date_field_in_record = rule[FormatDateConvKeys.DATEFIELD]
+        return date_field_in_record.replace("__", ".")
         # initially used '__' as key seperator but migrating to using
         # `.` as seperator. This line to allow old conversion yaml files
         # not to fail
-        date_field_in_record.replace("__", ".")
-        return date_field_in_record
 
     def _get_field(self) -> str:
         """
@@ -249,11 +248,10 @@ class DateFieldConvertor:
     def _get_date_formatter_method_name(
         rule: FormatDateRuleDict,
     ) -> DATE_METHOD_NAME:
-        format = rule.get(FormatDateConvKeys.FORMAT.value)
+        format = rule[FormatDateConvKeys.FORMAT]
+
         date_formatter_method_name = CONV_METHODS.get(format)
         if not date_formatter_method_name:
-            raise NotImplementedError(
-                f"Format date converter for '{format}' is not implemented"
-            )
+            raise FormatNotImplementedException(format)
 
         return date_formatter_method_name

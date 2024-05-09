@@ -37,12 +37,12 @@ class RulesFromYAML:
 
     RULE_SOURCE_TYPE = str
 
-    def __init__(self, rule_source: RULE_SOURCE_TYPE):
+    def __init__(self, rule_source: str):
         """
         Initializes the RulesFromYAML object with a YAML file source.
 
         Args:
-            rule_source (RULE_SOURCE_TYPE):
+            rule_source (str):
                 The filename, including path, of the YAML file.
         """
         self._rule_source = rule_source

@@ -16,10 +16,6 @@ from typing import Any, Optional
 import jmespath
 from jmespath.exceptions import ParseError
 
-from .package_settings.conditions.condition_settings.condition_types import (
-    ConditionsDict,
-)
-
 from .field_convertors import BaseFieldConvertor, DateFieldConvertor
 from .package_settings import (
     DateFormatProtocol,
@@ -30,6 +26,9 @@ from .package_settings import (
     SkipConvKeys,
     SkipRuleDict,
     keys_in_lower_case,
+)
+from .package_settings.conditions.condition_settings.condition_types import (
+    ConditionsDict,
 )
 from .rules_generator import RulesFromYAML
 
@@ -142,10 +141,8 @@ class RecordConvertor:
         if not rule_key.lower() == RecConvKeys.SKIP:
             return False
         skip_rule: SkipRuleDict = rule_value
-        conditions: Optional[ConditionsDict] = skip_rule.get(
-            SkipConvKeys.CONDITION.value
-        )
-        fieldname: Optional[str] = skip_rule.get(SkipConvKeys.FIELDNAME.value)
+        conditions: Optional[ConditionsDict] = skip_rule[SkipConvKeys.CONDITION]
+        fieldname: Optional[str] = skip_rule.get(SkipConvKeys.FIELDNAME)
         field_value = self._get_field(fieldname)
 
         return self.EVALUATE_CLASS(conditions, field_value).evaluate()

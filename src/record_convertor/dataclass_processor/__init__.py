@@ -130,7 +130,7 @@ class DataClassProcessor:
     def _set_record_covertor_arguments(self, rules: DataClassRuleDict):
         """Set arguments for the intial record conversion."""
         self._record_convertor_args: dict = rules.get(
-            DataClassRuleKeys.RECORD_CONVERSION_ARGUMENTS
+            DataClassRuleKeys.RECORD_CONVERSION_ARGUMENTS, {}
         )
 
     def _set_dataclass_methods(self, rules: DataClassRuleDict):
@@ -138,12 +138,12 @@ class DataClassProcessor:
         Set methods and their arguments to be used after the dataclass has been created.
         """
         self._data_class_methods: list[dict[str, Any]] = rules.get(
-            DataClassRuleKeys.METHODS
+            DataClassRuleKeys.METHODS  # type: ignore
         )
 
     def _set_dataclass_to_use(self, rules: DataClassRuleDict):
         """Select the dataclass to be used from the registered dataclasses."""
-        data_class_name = rules.get(DataClassRuleKeys.NAME)
+        data_class_name = rules[DataClassRuleKeys.NAME]
         try:
             self._dataclass_to_be_used: Type = getattr(self, data_class_name)
         except AttributeError:
