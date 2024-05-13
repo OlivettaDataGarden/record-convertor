@@ -37,7 +37,7 @@ def basic_test_convertor() -> RecordConvertor:
     class RecordConvertorTest(RecordConvertor):
         RULE_CLASS = EmptyRuleConvertorTest
         EVALUATE_CLASS = EveluateConditionsAlwaysToTrue
-        _record = {}
+        _input_record = {}
 
     return RecordConvertorTest(rule_source="test")
 
@@ -45,7 +45,7 @@ def basic_test_convertor() -> RecordConvertor:
 def test_get_field_method_returns_correct_value():
     class RecordConvertorTest(RecordConvertor):
         RULE_CLASS = RuleConvertorTest
-        _record = {"test_key": "test_value"}
+        _input_record = {"test_key": "test_value"}
 
     rc = RecordConvertorTest(rule_source="test")
     assert rc._get_field("test_key") == "test_value"
@@ -54,7 +54,7 @@ def test_get_field_method_returns_correct_value():
 def test_get_field_method_returns_correct_nested_field_value():
     class RecordConvertorTest(RecordConvertor):
         RULE_CLASS = RuleConvertorTest
-        _record = {"test_key": {"nested_key": "nested_test_value"}}
+        _input_record = {"test_key": {"nested_key": "nested_test_value"}}
 
     rc = RecordConvertorTest(rule_source="test")
     assert rc._get_field("test_key.nested_key") == "nested_test_value"
@@ -63,7 +63,7 @@ def test_get_field_method_returns_correct_nested_field_value():
 def test_get_field_method_returns_none_if_field_not_found():
     class RecordConvertorTest(RecordConvertor):
         RULE_CLASS = RuleConvertorTest
-        _record = {"test_key": {"nested_key": "nested_test_value"}}
+        _input_record = {"test_key": {"nested_key": "nested_test_value"}}
 
     rc = RecordConvertorTest(rule_source="test")
     assert rc._get_field("non_existing_field") is None
@@ -72,7 +72,7 @@ def test_get_field_method_returns_none_if_field_not_found():
 def test_get_field_method_returns_none_if_None_key_is_provided():
     class RecordConvertorTest(RecordConvertor):
         RULE_CLASS = RuleConvertorTest
-        _record = {"test_key": {"nested_key": "nested_test_value"}}
+        _input_record = {"test_key": {"nested_key": "nested_test_value"}}
 
     rc = RecordConvertorTest(rule_source="test")
     assert rc._get_field(key=None) is None
@@ -81,10 +81,10 @@ def test_get_field_method_returns_none_if_None_key_is_provided():
 def test_get_field_method_fixes_parse_error_with_int_keys_as_str():
     class RecordConvertorTest(RecordConvertor):
         RULE_CLASS = RuleConvertorTest
-        _record = {"1": "test_value"}
+        _input_record = {"1": "test_value"}
 
     with pytest.raises(ParseError):
-        jmespath.search("1", RecordConvertorTest._record)
+        jmespath.search("1", RecordConvertorTest._input_record)
 
     rc = RecordConvertorTest(rule_source="test")
     assert rc._get_field(key="1") == "test_value"
@@ -137,3 +137,24 @@ def test_copy_attribute_returns_stored_copy_attribute_when_not_None():
 
     record_convertor._stored_copy = copy_record_convertor
     assert record_convertor._copy == copy_record_convertor
+
+
+##############################
+# Test the skip record logic #
+##############################
+
+
+def test_skip_method_returns_false_if_skip_not_in_key():
+    record_convertor = basic_test_convertor()
+    assert not record_convertor._skip_this_record(rule=("$NOT_SKIP", SKIP_RULE))
+
+
+def test_skip_method_returns_true_if_skip_in_key_and_confition_is_true():
+    record_convertor = basic_test_convertor()
+    assert record_convertor._skip_this_record(rule=("$SKIP", SKIP_RULE))
+
+
+def test_skip_method_returns_false_if_skip_in_key_and_confition_is_false():
+    record_convertor = basic_test_convertor()
+    record_convertor.__class__.EVALUATE_CLASS = EveluateConditionsAlwaysToFalse
+    assert not record_convertor._skip_this_record(rule=("$SKIP", SKIP_RULE))
