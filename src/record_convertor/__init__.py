@@ -16,8 +16,11 @@ from typing import Any, Optional
 import jmespath
 from jmespath.exceptions import ParseError
 
+from record_convertor.dataclass_processor import DataClassProcessor
+
 from .field_convertors import BaseFieldConvertor, DateFieldConvertor
 from .package_settings import (
+    DataclassInstance,
     DateFormatProtocol,
     EvaluateConditions,
     FieldConvertorProtocol,
@@ -36,6 +39,7 @@ from .rules_generator import RulesFromYAML
 class RecordConvertor:
     RULE_CLASS = RulesFromYAML
     EVALUATE_CLASS = EvaluateConditions
+    DATA_CLASS_PROCESSOR: DataClassProcessor = DataClassProcessor()
     KEYS_IN_LOWER_CASE: bool = False
     DEFAULT_VALUE: dict = {}
     DEFAULT_FIELD_CONVERTOR_CLASS: type[FieldConvertorProtocol] = BaseFieldConvertor
@@ -47,6 +51,7 @@ class RecordConvertor:
         rule_source: str,
         field_convertor: Optional[type[FieldConvertorProtocol]] = None,
         date_formatter: Optional[type[DateFormatProtocol]] = None,
+        data_classes: Optional[list[type[DataclassInstance]]] = None,
     ):
         self._rules = self.RULE_CLASS(rule_source=rule_source).rules
         # set instance of given or default field convertor class
@@ -57,6 +62,10 @@ class RecordConvertor:
         self._date_formatter: DateFormatProtocol = (
             date_formatter or self.DEFAULT_DATE_FORMAT_CLASS
         )()
+        # set the dataclasses attribute as a dict with dataclass name as key and data
+        # the dataclass itself as value
+        dataclasses = data_classes or []
+        self.DATA_CLASS_PROCESSOR.register_data_classes(dataclasses=dataclasses)
 
     def convert(self, record: dict) -> dict:
         """
@@ -69,11 +78,13 @@ class RecordConvertor:
             dict: converted record
         """
         output_record: dict = {}
-        self._input_record = keys_in_lower_case(record) if \
-            self.KEYS_IN_LOWER_CASE else record
+        self._input_record = (
+            keys_in_lower_case(record) if self.KEYS_IN_LOWER_CASE else record
+        )
 
         # process all rules (and nested rules)
         for rule in self._rules.items():
+
             # check if the rule determines that the given record can be skipped
             # if so return default value
             if self._skip_this_record(rule):
@@ -82,6 +93,23 @@ class RecordConvertor:
             # check if the rule requires a change on the input record to be done
             # if rule is an input record update rule then proceed with the next rule.
             if self._change_field_in_input_record_if_required(rule=rule):
+                continue
+
+            # check if the rule requires a change on the input record to be done
+            # if rule is an input record update rule then proceed with the next rule.
+            if self._is_dataclass_rule(rule=rule):
+                return {}
+
+            # All possible command options have been excluded so rule must be a key
+            # definition for the new record:
+
+            output_record_key, output_record_value = rule
+
+            if isinstance(output_record_value, str):
+                # setup with None needed to allow result_for_key to be 0
+                result_for_output_record_key = self._get_field(output_record_value)
+                if result_for_output_record_key is not None:
+                    output_record[output_record_key] = result_for_output_record_key
                 continue
 
         return output_record
@@ -136,6 +164,10 @@ class RecordConvertor:
     def _format_date_rule(self, rule: tuple) -> bool:
         rule_key, _ = rule
         return "$format_date" in rule_key
+
+    def _is_dataclass_rule(self, rule: tuple) -> bool:
+        rule_key, _ = rule
+        return "$dataclass" in rule_key
 
     def _skip_this_record(self, rule: tuple) -> bool:
         rule_key, rule_value = rule

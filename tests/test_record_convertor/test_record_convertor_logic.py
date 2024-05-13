@@ -1,5 +1,8 @@
+from dataclasses import dataclass
 from typing import Optional
+
 from record_convertor import EvaluateConditions, RecordConvertor
+from record_convertor.dataclass_processor import DataClassProcessor
 from record_convertor.package_settings import BaseRuleDict, FormatDateRuleDict
 
 TEST_RULE = {"fieldname": "field1", "actions": []}
@@ -53,6 +56,7 @@ def basic_test_convertor(
     evaluate_class: type[EvaluateConditions] = EveluateConditionsAlwaysToTrue,
     field_convertor_class: type[FieldConvertorTest] = FieldConvertorTest,
     date_format_class: type[DateFormatTest] = DateFormatTest,
+    data_classes: Optional[list[type]] = None,
     default_value: Optional[dict] = None,
 ) -> RecordConvertor:
     class RecordConvertorTest(RecordConvertor):
@@ -61,10 +65,12 @@ def basic_test_convertor(
         DEFAULT_VALUE = default_value or {}
         _input_record = {}
 
+    data_classes = data_classes or []
     return RecordConvertorTest(
         rule_source="test",
         field_convertor=field_convertor_class,
         date_formatter=date_format_class,
+        data_classes=data_classes,
     )
 
 
@@ -190,11 +196,6 @@ def test_field_convert_method_no_change_of_input_without_convert_key():
     assert record_convertor._input_record == {"input": "input value"}
 
 
-###########################################
-# Test the _convert_field in record logic #
-###########################################
-
-
 def test_format_date_method_changes_input_record_with_format_date_key():
     class TestConvertRuleClass(RuleConvertorTest):
         DEFAULT_RULE = {"$format_date1": TEST_FORMAT_DATE_RULE}
@@ -246,3 +247,27 @@ def test_rec_convt_with_new_rules_from_dict_sets_leaves_all_other_attributes_as_
     assert new_record_covertor._field_convertor == record_covertor._field_convertor
     assert new_record_covertor.RULE_CLASS == record_covertor.RULE_CLASS
     assert new_record_covertor.KEYS_IN_LOWER_CASE == record_covertor.KEYS_IN_LOWER_CASE
+
+
+#############################
+# Test the data class logic #
+#############################
+
+
+def test_data_class_attribute_exist_if_no_dataclasses_provided():
+    record_convertor = basic_test_convertor()
+    assert isinstance(record_convertor.DATA_CLASS_PROCESSOR, DataClassProcessor)
+
+
+def test_data_class_processer_has_attribute_with_dataclass_name_in_snake_case_as_key():
+    @dataclass
+    class DataClassOne:
+        pass
+
+    @dataclass
+    class DataClassTwo:
+        pass
+
+    record_convertor = basic_test_convertor(data_classes=[DataClassOne, DataClassTwo])
+    assert "data_class_one" in dir(record_convertor.DATA_CLASS_PROCESSOR)
+    assert "data_class_two" in dir(record_convertor.DATA_CLASS_PROCESSOR)
