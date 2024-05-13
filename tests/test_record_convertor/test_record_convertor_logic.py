@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 from record_convertor import EvaluateConditions, RecordConvertor
+from record_convertor.command_processor import ProcessCommand
 from record_convertor.dataclass_processor import DataClassProcessor
 from record_convertor.package_settings import BaseRuleDict, FormatDateRuleDict
 
@@ -188,7 +189,7 @@ def test_field_convert_method_changes_the_input_record_with_convert_key():
 
 def test_field_convert_method_no_change_of_input_without_convert_key():
     class TestConvertRuleClass(RuleConvertorTest):
-        DEFAULT_RULE = {"$no_convert": None}
+        DEFAULT_RULE = {"no_convert": None}
 
     record_convertor = basic_test_convertor(rule_class=TestConvertRuleClass)
     input_record = {"input": "input value"}
@@ -208,7 +209,7 @@ def test_format_date_method_changes_input_record_with_format_date_key():
 
 def test_format_date_method_leaves_input_as_is_without_convert_key():
     class TestConvertRuleClass(RuleConvertorTest):
-        DEFAULT_RULE = {"$no_format_date1": TEST_FORMAT_DATE_RULE}
+        DEFAULT_RULE = {"no_format_date1": TEST_FORMAT_DATE_RULE}
 
     record_convertor = basic_test_convertor(rule_class=TestConvertRuleClass)
     input_record = {"date1": "date1"}
@@ -271,3 +272,50 @@ def test_data_class_processer_has_attribute_with_dataclass_name_in_snake_case_as
     record_convertor = basic_test_convertor(data_classes=[DataClassOne, DataClassTwo])
     assert "data_class_one" in dir(record_convertor.DATA_CLASS_PROCESSOR)
     assert "data_class_two" in dir(record_convertor.DATA_CLASS_PROCESSOR)
+
+
+def test_record_convertor_retrieves_result_from_data_class_processor():
+    class DataClassTestProcessor:
+        def data_from_dataclass(self, **kwargs) -> dict:
+            return {"test": "result"}
+
+    record_convertor = basic_test_convertor()
+    record_convertor.DATA_CLASS_PROCESSOR = DataClassTestProcessor()  # type: ignore
+    record_convertor._rules = {  # type: ignore
+        "dataclass_result": {
+            "$dataclass": {"data_class_name": "test", "params": {}, "method": []}
+        }
+    }
+
+    assert record_convertor.convert(record={}) == {
+        "dataclass_result": {"test": "result"}
+    }
+
+
+#####################################
+# Test the command class conversion #
+#####################################
+
+
+def test_command_class_attribute_exists():
+    record_convertor = basic_test_convertor()
+    assert issubclass(record_convertor._command_class, ProcessCommand)
+
+
+def test_record_convertor_runs_command_processor():
+    class CommandTestProcessor:
+        def __init__(self, **kwargs):
+            pass
+
+        def get_value(self, **kwargs) -> str:
+            return "test result command processor"
+
+    record_convertor = basic_test_convertor()
+    record_convertor._command_class = CommandTestProcessor  # type: ignore
+    record_convertor._rules = {  # type: ignore
+        "command_processor_result": {"$any_command": "any_value"}
+    }
+
+    assert record_convertor.convert(record={}) == {
+        "command_processor_result": "test result command processor"
+    }

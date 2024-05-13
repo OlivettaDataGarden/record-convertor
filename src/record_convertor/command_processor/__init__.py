@@ -131,9 +131,9 @@ class ProcessCommand:
 
     def __init__(
         self,
-        record: Dict,
+        record: dict,
         process_command: str,
-        process_args: Union[Dict, List, str],
+        process_args: Union[dict, list, str],
         record_convertor,
         add_process_commands=None,
     ):

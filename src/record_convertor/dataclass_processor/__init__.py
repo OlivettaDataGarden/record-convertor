@@ -147,10 +147,10 @@ class DataClassProcessor:
         try:
             self._dataclass_to_be_used: Type = getattr(self, data_class_name)
         except AttributeError:
-            raise ValueError(f"Unknown dataclass '{data_class_name}' defines in rules")
+            raise ValueError(f"Unknown dataclass '{data_class_name}' defined in rules")
 
     def _get_dataclass_content(self) -> dict:
-        """Convert input record into dataclass content using provided rules set."""
+        """Convert input record into dict that can be be used byu the dataclass."""
         dataclass_content_creator = (
             self._record_covertor.get_record_convertor_copy_with_new_rules(
                 new_rules=self._record_convertor_args

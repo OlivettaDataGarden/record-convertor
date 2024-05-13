@@ -16,6 +16,7 @@ from typing import Any, Optional
 import jmespath
 from jmespath.exceptions import ParseError
 
+from record_convertor.command_processor import ProcessCommand
 from record_convertor.dataclass_processor import DataClassProcessor
 
 from .field_convertors import BaseFieldConvertor, DateFieldConvertor
@@ -44,6 +45,7 @@ class RecordConvertor:
     DEFAULT_VALUE: dict = {}
     DEFAULT_FIELD_CONVERTOR_CLASS: type[FieldConvertorProtocol] = BaseFieldConvertor
     DEFAULT_DATE_FORMAT_CLASS: type[DateFormatProtocol] = DateFieldConvertor
+    COMMAND_CLASS: type[ProcessCommand] = ProcessCommand
     _stored_copy: Optional["RecordConvertor"] = None
 
     def __init__(
@@ -52,6 +54,7 @@ class RecordConvertor:
         field_convertor: Optional[type[FieldConvertorProtocol]] = None,
         date_formatter: Optional[type[DateFormatProtocol]] = None,
         data_classes: Optional[list[type[DataclassInstance]]] = None,
+        command_class: Optional[type[ProcessCommand]] = None
     ):
         self._rules = self.RULE_CLASS(rule_source=rule_source).rules
         # set instance of given or default field convertor class
@@ -66,6 +69,7 @@ class RecordConvertor:
         # the dataclass itself as value
         dataclasses = data_classes or []
         self.DATA_CLASS_PROCESSOR.register_data_classes(dataclasses=dataclasses)
+        self._command_class = command_class or self.COMMAND_CLASS
 
     def convert(self, record: dict) -> dict:
         """
@@ -98,12 +102,34 @@ class RecordConvertor:
             # check if the rule requires a change on the input record to be done
             # if rule is an input record update rule then proceed with the next rule.
             if self._is_dataclass_rule(rule=rule):
-                return {}
+
+                return self.DATA_CLASS_PROCESSOR.data_from_dataclass(
+                    record = self._input_record,
+                    rules=rule,  # type: ignore
+                    record_convertor=self._copy
+                )
 
             # All possible command options have been excluded so rule must be a key
             # definition for the new record:
+            if self._is_command_rule(rule=rule):
+                command, command_args = rule
+                return self._command_class(
+                    record = self._input_record,
+                    process_command=command,
+                    process_args=command_args,
+                    record_convertor=self._copy
+                ).get_value()
 
             output_record_key, output_record_value = rule
+
+            if isinstance(output_record_value, dict):
+                nested_record_covertor = self.get_record_convertor_copy_with_new_rules(
+                    output_record_value)
+                output_record[output_record_key] = nested_record_covertor.convert(
+                    record=self._input_record
+                )
+                continue
+    
 
             if isinstance(output_record_value, str):
                 # setup with None needed to allow result_for_key to be 0
@@ -168,6 +194,10 @@ class RecordConvertor:
     def _is_dataclass_rule(self, rule: tuple) -> bool:
         rule_key, _ = rule
         return "$dataclass" in rule_key
+
+    def _is_command_rule(self, rule: tuple) -> bool:
+        rule_key, _ = rule
+        return rule_key[0] == "$"
 
     def _skip_this_record(self, rule: tuple) -> bool:
         rule_key, rule_value = rule
