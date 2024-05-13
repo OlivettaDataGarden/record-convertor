@@ -49,19 +49,6 @@ PARAMS_SELECT_FROM_LIST_VALUE_NOT_FOUND = {
     },
 }
 
-PARAMS_SELECT_FROM_LIST_VALUE_NOT_FOUND = {
-    "record": {
-        "list_key_name": [
-            {"item1": 1, "selector": 1},
-            {"item2": 2, "selector": 2},
-        ]
-    },
-    "conversion_rule": {
-        "fieldname": "list_key_name",
-        "actions": [{"select_object_from_list": ["selector", 3]}],
-    },
-}
-
 PARAMS_SELECT_FROM_LIST_WITH_NON_DICT_ENTRIES = {
     "record": {"list_key_name": [1, 2, "item1", "item2"]},
     "conversion_rule": {
