@@ -69,7 +69,8 @@ class RecordConvertor:
             dict: converted record
         """
         output_record: dict = {}
-        self._record = keys_in_lower_case(record) if self.KEYS_IN_LOWER_CASE else record
+        self._input_record = keys_in_lower_case(record) if \
+            self.KEYS_IN_LOWER_CASE else record
 
         # process all rules (and nested rules)
         for rule in self._rules.items():
@@ -113,16 +114,16 @@ class RecordConvertor:
         # check if the rule triggers a field conversion in the input record
         if self._convert_field_rule(rule):
             _, rule_dict = rule
-            self._record = self._field_convertor.convert_field(
-                record=self._record, conversion_rule=rule_dict
+            self._input_record = self._field_convertor.convert_field(
+                record=self._input_record, conversion_rule=rule_dict
             )
             return True
 
         # check if the rule triggers a field date conversion in the input record
         if self._format_date_rule(rule):
             _, rule_dict = rule
-            self._record = self._date_formatter.format_date_field(
-                record=self._record, conversion_rule=rule_dict
+            self._input_record = self._date_formatter.format_date_field(
+                record=self._input_record, conversion_rule=rule_dict
             )
             return True
 
@@ -155,7 +156,7 @@ class RecordConvertor:
             nested_keys = key.split(".")
             nested_key = ".".join(['"' + key + '"' for key in nested_keys])
             try:
-                return jmespath.search(nested_key, self._record)
+                return jmespath.search(nested_key, self._input_record)
             except ParseError:
                 pass
 
