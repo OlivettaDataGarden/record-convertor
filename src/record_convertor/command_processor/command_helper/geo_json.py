@@ -5,10 +5,10 @@ methods:
     - lat_lon_to_geojson_point
 """
 
+from typing import Any
 
-def lat_lon_to_geojson_point(
-    latitude: float, longitude: float, operator=None, digits=5
-):
+
+def lat_lon_to_geojson_point(latitude: Any, longitude: Any, operator=None, digits=5):
     """
     converts latt and long to a geojson dict.
 

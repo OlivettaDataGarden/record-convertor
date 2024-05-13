@@ -102,7 +102,11 @@ from typing import Dict, List, Union
 import jmespath
 from jmespath.exceptions import ParseError
 
-from .command_helper import lat_lon_to_geojson_point
+from .command_helper import (
+    lat_lon_to_geojson_point,
+    process_args_is_dict,
+    process_args_is_list,
+)
 
 __all__ = ["ProcessCommand"]
 
@@ -129,7 +133,7 @@ class ProcessCommand:
         self,
         record: Dict,
         process_command: str,
-        process_args: Union[Dict, List],
+        process_args: Union[Dict, List, str],
         record_convertor,
         add_process_commands=None,
     ):
@@ -150,24 +154,30 @@ class ProcessCommand:
 
     def allow_none_value(self):
         """Returns value for field and None if no field can be found"""
-        return self._get_field(self.process_args.get("field_name"))
+        process_args = process_args_is_dict(self.process_args)
+
+        return self._get_field(process_args.get("field_name"), None)
 
     def to_list(self):
         """
         retrieve the values for a list of fields and returns them as a list
         """
+        process_args = process_args_is_list(self.process_args)
         return list(
             filter(
-                None, [self._get_field(field_name) for field_name in self.process_args]
+                None,
+                [self._get_field(field_name) for field_name in process_args],
             )
         )
 
     def to_int(self):
-        """removes a list of strings from a string and returns what remains"""
-        amount = self._get_field(self.process_args.get("field_name", None))
+        """turn a string into an int"""
+        process_args = process_args_is_dict(self.process_args)
+        field_name = process_args.get("field_name")
+        amount = self._get_field(field_name)
         if not amount:
             return None
-        remove_list = self.process_args.get("strip", None)
+        remove_list = process_args.get("strip", None)
         if isinstance(remove_list, (str, int)):
             remove_list = [str(remove_list)]
         for item in remove_list:
@@ -185,7 +195,9 @@ class ProcessCommand:
         converts a list of dicts from the input record to a new cleaned list of
         dicts
         """
-        rules = self.process_args.copy()
+        process_args = process_args_is_dict(self.process_args)
+
+        rules = process_args.copy()
         obj_list = self._get_field(rules.pop("list_field_name"))
 
         if not (obj_list and isinstance(obj_list, list)):
@@ -213,8 +225,9 @@ class ProcessCommand:
         )
 
     def join_key_value(self):
-        key_key = self.process_args.get("key", False)
-        value_key = self.process_args.get("value", False)
+        process_args = process_args_is_dict(self.process_args)
+        key_key = process_args.get("key", False)
+        value_key = process_args.get("value", False)
         if not (key_key and value_key):
             raise KeyError("Missing `key` or `value` argument")
 
@@ -234,12 +247,13 @@ class ProcessCommand:
             try:
                 return {key: value}
             except (TypeError, KeyError):
-                pass
-        return None
+                return None
 
     def key_value(self):
-        key = self.process_args.get("key", False)
-        value = self.process_args.get("value", False)
+        process_args = process_args_is_dict(self.process_args)
+
+        key = process_args.get("key", False)
+        value = process_args.get("value", False)
         if not (key and value):
             raise KeyError("Missing `key` or `value` argument")
         return {key: self._get_field(value)}
@@ -252,9 +266,11 @@ class ProcessCommand:
         """
         Retrieves lat, lon fields from record and returns them in point format.
         """
+        process_args = process_args_is_dict(self.process_args)
+
         # check if lat and lon field names are provided in the value
-        lat_field = self.process_args.get("lat", False)
-        lon_field = self.process_args.get("lon", False)
+        lat_field = process_args.get("lat", False)
+        lon_field = process_args.get("lon", False)
         if not (lat_field and lon_field):
             raise ValueError("Both lat and lon field required for Point Field")
 
@@ -300,8 +316,10 @@ class ProcessCommand:
         """
         returns the value represented in a string in a string format
         """
-        seperators = self.process_args.get("seperators", False)
-        field_name = self.process_args.get("field_name", False)
+        process_args = process_args_is_dict(self.process_args)
+
+        seperators = process_args.get("seperators", False)
+        field_name = process_args.get("field_name", False)
         if not (seperators and field_name):
             return None
 
@@ -311,20 +329,26 @@ class ProcessCommand:
 
         for seperator in seperators:
             field_value = field_value.replace(seperator, "")
-
-        return re.search(r"\d+", field_value).group()
+        match = re.search(r"\d+", field_value)
+        return match.group() if match else None
 
     def split_field(self):
         """
         Split the requested field and returns a specific entry from the split
         result
         """
-        seperator = self.process_args.get("seperator", False)
-        field_name = self.process_args.get("field_name", False)
-        index = self.process_args.get("index", False)
+        process_args = process_args_is_dict(self.process_args)
+
+        seperator = process_args.get("seperator", False)
+        field_name = process_args.get("field_name", False)
+        index = process_args.get("index", False)
         if not (seperator and field_name and (index is not False)):
             return None
         field_value = self._get_field(field_name)
+
+        if field_value is None:
+            return None
+
         try:
             return field_value.split(seperator)[index]
         except (IndexError, AttributeError):

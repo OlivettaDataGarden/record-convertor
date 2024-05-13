@@ -1,8 +1,8 @@
 import jmespath
 import pytest
-
 from jmespath.exceptions import ParseError
-from record_convertor import RecordConvertor, EvaluateConditions
+
+from record_convertor import EvaluateConditions, RecordConvertor
 
 TEST_RULES = {"rule1": "test"}
 SKIP_RULE = {"fieldname": "field1", "condition": {"does_not_equal": "test"}}
@@ -90,9 +90,9 @@ def test_get_field_method_fixes_parse_error_with_int_keys_as_str():
     assert rc._get_field(key="1") == "test_value"
 
 
-#############################################
-#### Test the _convert_field_rule method ####
-#############################################
+#######################################
+# Test the _convert_field_rule method #
+#######################################
 
 
 def test_convert_field_rule_method_returns_false_when_convert_not_in_rule_key():
@@ -103,9 +103,9 @@ def test_convert_field_rule_method_returns_true_when_convert_in_rule_key():
     assert basic_test_convertor()._convert_field_rule(("$convert1", "test"))
 
 
-#######################################
-#### Test the _format_date  method ####
-#######################################
+#################################
+# Test the _format_date  method #
+#################################
 
 
 def test_format_date_rule_method_returns_false_when_convert_not_in_rule_key():
@@ -114,3 +114,26 @@ def test_format_date_rule_method_returns_false_when_convert_not_in_rule_key():
 
 def test_format_date_rule_method_returns_true_when_convert_in_rule_key():
     assert basic_test_convertor()._format_date_rule(("$format_date", "test"))
+
+
+############################
+# Test the _copy attribute #
+############################
+
+
+def test_copy_attribute_sets_the_stored_copy_attribute():
+    record_convertor = basic_test_convertor()
+    assert record_convertor._stored_copy is None
+    record_convertor._copy
+    assert isinstance(record_convertor._stored_copy, RecordConvertor)
+
+
+def test_copy_attribute_returns_stored_copy_attribute_when_not_None():
+    class CopyRecordConvertor(RecordConvertor):
+        RULE_CLASS = EmptyRuleConvertorTest
+
+    record_convertor = basic_test_convertor()
+    copy_record_convertor = CopyRecordConvertor(rule_source="test")
+
+    record_convertor._stored_copy = copy_record_convertor
+    assert record_convertor._copy == copy_record_convertor

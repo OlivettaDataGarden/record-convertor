@@ -10,23 +10,27 @@ usage:
 >>>     RecordConvertor(rules: Rules).convert(record: dict)
 """
 
+from copy import copy
 from typing import Any, Optional
 
 import jmespath
 from jmespath.exceptions import ParseError
 
+from .field_convertors import BaseFieldConvertor, DateFieldConvertor
 from .package_settings import (
+    DateFormatProtocol,
     EvaluateConditions,
-    keys_in_lower_case,
+    FieldConvertorProtocol,
     RecConvKeys,
+    RulesDict,
     SkipConvKeys,
     SkipRuleDict,
-    FieldConvertorProtocol,
-    DateFormatProtocol,
+    keys_in_lower_case,
+)
+from .package_settings.conditions.condition_settings.condition_types import (
+    ConditionsDict,
 )
 from .rules_generator import RulesFromYAML
-
-from .field_convertors import BaseFieldConvertor, DateFieldConvertor
 
 
 class RecordConvertor:
@@ -36,10 +40,11 @@ class RecordConvertor:
     DEFAULT_VALUE: dict = {}
     DEFAULT_FIELD_CONVERTOR_CLASS: type[FieldConvertorProtocol] = BaseFieldConvertor
     DEFAULT_DATE_FORMAT_CLASS: type[DateFormatProtocol] = DateFieldConvertor
+    _stored_copy: Optional["RecordConvertor"] = None
 
     def __init__(
         self,
-        rule_source: RULE_CLASS.RULE_SOURCE_TYPE,
+        rule_source: str,
         field_convertor: Optional[type[FieldConvertorProtocol]] = None,
         date_formatter: Optional[type[DateFormatProtocol]] = None,
     ):
@@ -63,7 +68,7 @@ class RecordConvertor:
         Returns:
             dict: converted record
         """
-        output_record = {}
+        output_record: dict = {}
         self._record = keys_in_lower_case(record) if self.KEYS_IN_LOWER_CASE else record
 
         # process all rules (and nested rules)
@@ -79,6 +84,24 @@ class RecordConvertor:
                 continue
 
         return output_record
+
+    def get_record_convertor_copy_with_new_rules(
+        self, new_rules: RulesDict
+    ) -> "RecordConvertor":
+        """
+        Return a copy of the current record convertor instance with new rules.
+        """
+        new_record_convertor = self._copy
+        new_record_convertor._rules = new_rules
+        return new_record_convertor
+
+    @property
+    def _copy(self) -> "RecordConvertor":
+        # prevent from creating class copy everytime a _copy method is called
+        # by storing the first copy in the _stored_copy attribute
+        if not self._stored_copy:
+            self._stored_copy = copy(self)
+        return self._stored_copy
 
     def _change_field_in_input_record_if_required(self, rule: tuple) -> bool:
         """
@@ -118,8 +141,8 @@ class RecordConvertor:
         if not rule_key.lower() == RecConvKeys.SKIP:
             return False
         skip_rule: SkipRuleDict = rule_value
-        conditions = skip_rule.get(SkipConvKeys.CONDITION)
-        fieldname = skip_rule.get(SkipConvKeys.FIELDNAME)
+        conditions: Optional[ConditionsDict] = skip_rule[SkipConvKeys.CONDITION]
+        fieldname: Optional[str] = skip_rule.get(SkipConvKeys.FIELDNAME)
         field_value = self._get_field(fieldname)
 
         return self.EVALUATE_CLASS(conditions, field_value).evaluate()

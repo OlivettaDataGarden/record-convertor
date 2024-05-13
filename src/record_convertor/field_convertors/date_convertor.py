@@ -33,6 +33,7 @@ from ..package_settings import (
     EvaluateConditions,
     FormatDateConvKeys,
     FormatDateRuleDict,
+    FormatNotImplementedException,
 )
 
 __all__ = ["DateFieldConvertor"]
@@ -60,16 +61,28 @@ CONV_METHODS: Dict[str, DATE_METHOD_NAME] = {
 
 class DateFieldConvertor:
     """
-    A class dedicated to converting date fields within records according to specified conversion rules.
+    A class dedicated to converting date fields within records according to specified
+    conversion rules.
 
-    This class applies a series of predefined actions to transform the format of date fields in a given record. It supports both direct and nested fields within the record's dictionary structure. The conversion process is contingent upon the fulfillment of specified conditions, allowing for versatile date field manipulation.
+    This class applies a series of predefined actions to transform the format of date
+    fields in a given record. It supports both direct and nested fields within the
+    record's dictionary structure. The conversion process is contingent upon the
+    fulfillment of specified conditions, allowing for versatile date field manipulation.
 
     Parameters:
-    - record (Dict): The record containing the date field to be converted. This argument expects a dictionary.
-    - conversion_rule (FormatDateRuleDict): A dictionary specifying the conversion rules. The rules dictionary should include the following keys:
-        - 'fieldname': The name of the field to be converted.
-        - 'format': The name of the input format.
-        - 'conditions' (optional): Conditions that must be met for the conversion to proceed. If not provided, the conversion is assumed to be unconditional.
+    - record (Dict):
+        The record containing the date field to be converted. This argument expects a
+        dictionary.
+    - conversion_rule (FormatDateRuleDict):
+        A dictionary specifying the conversion rules. The rules dictionary should
+        include the following keys:
+            - 'fieldname':
+                The name of the field to be converted.
+            - 'format':
+                The name of the input format.
+            - 'conditions' (optional):
+                Conditions that must be met for the conversion to proceed.
+                If not provided, the conversion is assumed to be unconditional.
 
     Available Conversions:
     - unix_dt_stamp: Converts Unix timestamp (string) to 'YYYY-MM-DD'.
@@ -80,15 +93,24 @@ class DateFieldConvertor:
     - day_month_year_dotted: Converts 'DD.MM.YYYY' to 'YYYY-MM-DD'.
 
     Methods:
-    - convert_date: Converts the date field in the record to the 'YYYY-MM-DD' format based on the provided conversion rule.
-    - all_conditions_true: Evaluates if all specified conditions are met for the given date field value.
-    - update_field_with_date: Updates the specified field in the record with the new date format.
-    - _get_field: Retrieves the value from a potentially nested field within the record.
+    - convert_date:
+        Converts the date field in the record to the 'YYYY-MM-DD' format based on the
+        provided conversion rule.
+    - all_conditions_true:
+        Evaluates if all specified conditions are met for the given date field value.
+    - update_field_with_date:
+        Updates the specified field in the record with the new date format.
+    - _get_field:
+        Retrieves the value from a potentially nested field within the record.
 
-    The conversion process supports handling both flat and nested dictionary structures, with the ability to navigate through nested fields specified by a dot-separated path.
+    The conversion process supports handling both flat and nested dictionary structures,
+    with the ability to navigate through nested fields specified by a dot-separated
+    path.
 
     Example:
-        To convert a date field within a record, instantiate the `DateFieldConvertor` with the target record and a rule dict outlining the conversion specifics. Then, call the `convert_date` method to apply the conversion.
+        To convert a date field within a record, instantiate the `DateFieldConvertor`
+        with the target record and a rule dict outlining the conversion specifics.
+        Then, call the `convert_date` method to apply the conversion.
     """
 
     def format_date_field(
@@ -97,6 +119,13 @@ class DateFieldConvertor:
         """
         Method to convert a date field in a record into into a
         'YYYY-MM-DD' string date format.
+
+        Args:
+            - record (Dict):
+                The record containing the date field to be converted.
+            - conversion_rule (RuleDict):
+                The conversion rules specifying the fieldname, actions, and optional
+                conditions.
         """
         self._record = record
         self.date_field_key_name: str = self._get_date_field_key_name(conversion_rule)
@@ -110,14 +139,6 @@ class DateFieldConvertor:
             self.update_field_with_date(date_in_new_format)
 
         return self._record
-
-        """
-        Initializes the DateFieldConvertor with a record and a set of conversion rules.
-
-        Args:
-        - record (Dict): The record containing the date field to be converted.
-        - conversion_rule (RuleDict): The conversion rules specifying the fieldname, actions, and optional conditions.
-        """
 
     @staticmethod
     def unix_dt_stamp(unix_dt_stamp: str) -> str:
@@ -157,7 +178,7 @@ class DateFieldConvertor:
         self, date_field_value: str, conversion_rule: FormatDateRuleDict
     ) -> bool:
         """Returns True if all provided conditions are satisfied."""
-        conditions = conversion_rule.get(FormatDateConvKeys.CONDITION, False)
+        conditions = conversion_rule.get(FormatDateConvKeys.CONDITION)
         if not conditions:
             return True
 
@@ -199,13 +220,11 @@ class DateFieldConvertor:
 
     @staticmethod
     def _get_date_field_key_name(rule: FormatDateRuleDict) -> str:
-        date_field_in_record = rule.get(FormatDateConvKeys.DATEFIELD)
-
+        date_field_in_record = rule[FormatDateConvKeys.DATEFIELD]
+        return date_field_in_record.replace("__", ".")
         # initially used '__' as key seperator but migrating to using
         # `.` as seperator. This line to allow old conversion yaml files
         # not to fail
-        date_field_in_record.replace("__", ".")
-        return date_field_in_record
 
     def _get_field(self) -> str:
         """
@@ -226,12 +245,13 @@ class DateFieldConvertor:
         return str(date_value_from_record) if date_value_from_record else ""
 
     @staticmethod
-    def _get_date_formatter_method_name(rule: FormatDateRuleDict) -> DATE_METHOD_NAME:
-        format = rule.get(FormatDateConvKeys.FORMAT)
+    def _get_date_formatter_method_name(
+        rule: FormatDateRuleDict,
+    ) -> DATE_METHOD_NAME:
+        format = rule[FormatDateConvKeys.FORMAT]
+
         date_formatter_method_name = CONV_METHODS.get(format)
         if not date_formatter_method_name:
-            raise NotImplementedError(
-                f"Format date converter for '{format}' is not implemented"
-            )
+            raise FormatNotImplementedException(format)
 
         return date_formatter_method_name

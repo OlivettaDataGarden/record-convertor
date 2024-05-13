@@ -1,4 +1,5 @@
-from typing import Dict, Optional, TypedDict, Union
+from enum import Enum
+from typing import Literal, Optional, TypedDict, Union
 
 from .conditions import ConditionsDict
 
@@ -11,39 +12,45 @@ __all__ = [
     "FormatDateConvKeys",
     "SkipConvKeys",
     "SkipRuleDict",
+    "DataClassRuleKeys",
+    "DataClassRuleDict",
 ]
 
 
 class RecConvKeys:
-    SKIP = "$skip"
-    CONVERT = "$convert"
+    SKIP: Literal["$skip"] = "$skip"
+    CONVERT: Literal["$convert"] = "$convert"
 
 
-class GenericRuleKeys:
-    # generic fields
-    CONDITION = "condition"
+class BaseConvertorKeys:
+    CONDITION: Literal["condition"] = "condition"
+    FIELDNAME: Literal["fieldname"] = "fieldname"
+    ACTIONS: Literal["actions"] = "actions"
+    ACTIONTYPE: Literal["action_type"] = "action_type"
+    ACTIONVALUE: Literal["action_value"] = "action_value"
 
 
-class BaseConvertorKeys(GenericRuleKeys):
-    FIELDNAME = "fieldname"
-    ACTIONS = "actions"
-    ACTIONTYPE = "action_type"
-    ACTIONVALUE = "action_value"
+class FormatDateConvKeys:
+    CONDITION: Literal["condition"] = "condition"
+    FORMAT: Literal["format"] = "format"
+    DATEFIELD: Literal["date_field"] = "date_field"
 
 
-class FormatDateConvKeys(GenericRuleKeys):
-    FORMAT = "format"
-    DATEFIELD = "date_field"
+class SkipConvKeys:
+    CONDITION: Literal["condition"] = "condition"
+    FIELDNAME: Literal["fieldname"] = "fieldname"
 
 
-class SkipConvKeys(GenericRuleKeys):
-    FIELDNAME = "fieldname"
+class DataClassRuleKeys:
+    NAME: Literal["data_class_name"] = "data_class_name"
+    RECORD_CONVERSION_ARGUMENTS: Literal["params"] = "params"
+    METHODS: Literal["methods"] = "methods"
 
 
 class BaseRuleDict(TypedDict):
     condition: Optional[ConditionsDict]
     format: Optional[str]  # used by date convertor
-    fieldname: Optional[str]
+    fieldname: str
     actions: Optional[dict]
     action_type: Optional[str]  # tbd if these are still needed
     action_value: Union[str, dict]  # tbd if these are still needed
@@ -60,4 +67,25 @@ class SkipRuleDict(TypedDict):
     fieldname: str
 
 
-RulesDict = Dict[str, Union[BaseRuleDict, FormatDateRuleDict, SkipRuleDict]]
+class DataClassRuleDict(TypedDict):
+    data_class_name: str
+    params: dict
+    methods: list[dict]
+
+
+RulesDict = Union[
+    BaseRuleDict,
+    FormatDateRuleDict,
+    SkipRuleDict,
+    DataClassRuleDict,
+    dict[
+        str,
+        Union[
+            str,
+            BaseRuleDict,
+            FormatDateRuleDict,
+            SkipRuleDict,
+            DataClassRuleDict,
+        ],
+    ],
+]

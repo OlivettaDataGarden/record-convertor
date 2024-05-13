@@ -37,31 +37,48 @@ class EvaluateConditions:
             if all conditions are met, otherwise False.
 
     Supported Conditions:
-        - is_a_string: Checks if the value is a string.
-        - is_not_a_string: Checks if the value is not a string.
-        - is_null: Checks if the value is None, based on a boolean argument.
-        - date_not_today: Verifies that a date string (YYYY-MM-DD) does not represent today's date.
-        - str_length: Checks if the value's string representation has a specific length.
-        - field_does_not_exist: Returns True if the value is None (field does not exist).
-        - field_does_exist: Returns True if the value is not None (field exists).
-        - equals: Checks if the value equals a specified value.
-        - in_list: Verifies if the value exists within a provided list.
-        - does_not_equal: Checks if the value does not equal a specified value.
-        - contains: Determines if a substring exists within the value.
-        - does_not_contain: Determines if a substring does not exist within the value.
+        - is_a_string:
+            Checks if the value is a string.
+        - is_not_a_string:
+            Checks if the value is not a string.
+        - is_null:
+            Checks if the value is None, based on a boolean argument.
+        - date_not_today:
+            Verifies that a date string (YYYY-MM-DD) does not represent today's date.
+        - str_length:
+            Checks if the value's string representation has a specific length.
+        - field_does_not_exist:
+            Returns True if the value is None (field does not exist).
+        - field_does_exist:
+            Returns True if the value is not None (field exists).
+        - equals:
+            Checks if the value equals a specified value.
+        - in_list:
+            Verifies if the value exists within a provided list.
+        - does_not_equal:
+            Checks if the value does not equal a specified value.
+        - contains:
+            Determines if a substring exists within the value.
+        - does_not_contain:
+            Determines if a substring does not exist within the value.
 
     Raises:
-        NotImplementedError: If a provided condition does not match any supported condition method.
-        ValueError: If conditions 'contains' or 'does_not_contain' are provided None as input.
+        NotImplementedError:
+            If a provided condition does not match any supported condition method.
+        ValueError:
+            If conditions 'contains' or 'does_not_contain' are provided None as input.
 
     Example:
         >>> conditions = {"is_a_string": True, "str_length": 5}
-        >>> evaluator = EvaluateConditions(provided_conditions=conditions, value="Hello")
+        >>> evaluator = EvaluateConditions(
+        ...     provided_conditions=conditions, value="Hello"
+        ... )
         >>> evaluator.evaluate()
         True
 
     Note:
-        The 'date_not_today' condition does not validate the format of the input date string.
+        The 'date_not_today' condition does not validate the format of the input date
+        string.
     """
 
     def __init__(
@@ -127,6 +144,7 @@ class EvaluateConditions:
     def in_list(self) -> bool:
         if not isinstance(self.provided_conditions["in_list"], list):
             return False
+
         return self.value in self.provided_conditions["in_list"]
 
     def does_not_equal(self) -> bool:
@@ -135,6 +153,8 @@ class EvaluateConditions:
     def contains(self) -> bool:
         if self.provided_conditions["contains"] is None:
             raise ValueError("Condition 'contains' can not have None as input value.")
+        if not isinstance(self.value, (list, str)):
+            return False
         return self.provided_conditions["contains"] in self.value
 
     def does_not_contain(self) -> bool:
@@ -142,4 +162,7 @@ class EvaluateConditions:
             raise ValueError(
                 "Condition 'does_not_contain' can not have None as input value."
             )
+        if not isinstance(self.value, (list, str)):
+            return False
+
         return self.provided_conditions["does_not_contain"] not in self.value

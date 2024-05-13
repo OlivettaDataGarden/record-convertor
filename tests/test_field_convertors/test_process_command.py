@@ -3,7 +3,7 @@
 from datetime import datetime
 
 import pytest
-from data.test_data_process_command import (
+from data.data_process_command_tests import (
     BASE_PARAMS,
     PARAMS_ALLOW_NONE_VALUE_NONE,
     PARAMS_ALLOW_NONE_VALUE_WITH_VALUE,
