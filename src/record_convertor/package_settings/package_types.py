@@ -1,4 +1,3 @@
-from enum import Enum
 from typing import Literal, Optional, TypedDict, Union
 
 from .conditions import ConditionsDict
