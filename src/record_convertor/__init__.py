@@ -34,7 +34,7 @@ from .package_settings import (
 from .package_settings.conditions.condition_settings.condition_types import (
     ConditionsDict,
 )
-from .rules_generator import RulesFromYAML
+from .rules_generator import RulesFromDict, RulesFromYAML  # NOQA: F401
 
 
 class RecordConvertor:
@@ -114,7 +114,7 @@ class RecordConvertor:
                 return self._command_class(
                     record=self._input_record,
                     process_command=command,
-                    process_args=command_args, # type: ignore
+                    process_args=command_args,  # type: ignore
                     record_convertor=self._copy,
                 ).get_value()
 
