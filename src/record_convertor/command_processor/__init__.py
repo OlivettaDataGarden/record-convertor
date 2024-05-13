@@ -97,7 +97,7 @@ Availale conversion commands
 
 import re
 from datetime import datetime
-from typing import Dict, List, Union
+from typing import Union
 
 import jmespath
 from jmespath.exceptions import ParseError

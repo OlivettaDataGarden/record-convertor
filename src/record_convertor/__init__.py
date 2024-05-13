@@ -54,7 +54,7 @@ class RecordConvertor:
         field_convertor: Optional[type[FieldConvertorProtocol]] = None,
         date_formatter: Optional[type[DateFormatProtocol]] = None,
         data_classes: Optional[list[type[DataclassInstance]]] = None,
-        command_class: Optional[type[ProcessCommand]] = None
+        command_class: Optional[type[ProcessCommand]] = None,
     ):
         self._rules = self.RULE_CLASS(rule_source=rule_source).rules
         # set instance of given or default field convertor class
@@ -88,7 +88,6 @@ class RecordConvertor:
 
         # process all rules (and nested rules)
         for rule in self._rules.items():
-
             # check if the rule determines that the given record can be skipped
             # if so return default value
             if self._skip_this_record(rule):
@@ -102,11 +101,10 @@ class RecordConvertor:
             # check if the rule requires a change on the input record to be done
             # if rule is an input record update rule then proceed with the next rule.
             if self._is_dataclass_rule(rule=rule):
-
                 return self.DATA_CLASS_PROCESSOR.data_from_dataclass(
-                    record = self._input_record,
+                    record=self._input_record,
                     rules=rule,  # type: ignore
-                    record_convertor=self._copy
+                    record_convertor=self._copy,
                 )
 
             # All possible command options have been excluded so rule must be a key
@@ -114,22 +112,22 @@ class RecordConvertor:
             if self._is_command_rule(rule=rule):
                 command, command_args = rule
                 return self._command_class(
-                    record = self._input_record,
+                    record=self._input_record,
                     process_command=command,
-                    process_args=command_args,
-                    record_convertor=self._copy
+                    process_args=command_args, # type: ignore
+                    record_convertor=self._copy,
                 ).get_value()
 
             output_record_key, output_record_value = rule
 
             if isinstance(output_record_value, dict):
                 nested_record_covertor = self.get_record_convertor_copy_with_new_rules(
-                    output_record_value)
+                    output_record_value
+                )
                 output_record[output_record_key] = nested_record_covertor.convert(
                     record=self._input_record
                 )
                 continue
-    
 
             if isinstance(output_record_value, str):
                 # setup with None needed to allow result_for_key to be 0
