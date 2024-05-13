@@ -60,7 +60,7 @@ class DataClassProcessor:
         self._record = record
         self._record_covertor = record_convertor
         self._prepare_dataclass_settings(rules=rules)
-        return self._create_return_dict(rules=rules)
+        return self._create_return_dict()
 
     def register_dict_of_data_classes(
         self, dataclasses: dict[str, Type[DataclassInstance]]
@@ -149,18 +149,18 @@ class DataClassProcessor:
         except AttributeError:
             raise ValueError(f"Unknown dataclass '{data_class_name}' defines in rules")
 
-    def _get_dataclass_content(self, rules: DataClassRuleDict) -> dict:
+    def _get_dataclass_content(self) -> dict:
         """Convert input record into dataclass content using provided rules set."""
         dataclass_content_creator = (
             self._record_covertor.get_record_convertor_copy_with_new_rules(
-                new_rules=rules
+                new_rules=self._record_convertor_args
             )
         )
         return dataclass_content_creator.convert(record=self._record)
 
-    def _create_return_dict(self, rules: DataClassRuleDict) -> dict:
+    def _create_return_dict(self) -> dict:
         """Create dict record to be returned."""
-        dataclass_content = self._get_dataclass_content(rules)
+        dataclass_content = self._get_dataclass_content()
         dataclass_instance = self._get_dataclass_instance(dataclass_content)
         return asdict(dataclass_instance)
 

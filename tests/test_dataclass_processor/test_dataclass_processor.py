@@ -1,10 +1,13 @@
 from copy import deepcopy
 from dataclasses import dataclass
+from typing import Optional
 
 import pytest
 
 from record_convertor.dataclass_processor import DataClassProcessor
 from record_convertor.package_settings import DataClassRuleDict, DataClassRuleKeys
+
+from ..test_record_convertor.test_record_convertor_logic import basic_test_convertor
 
 
 @dataclass
@@ -13,6 +16,15 @@ class DataClassTest: ...  # noqa: E701
 
 @dataclass
 class DataClassTestTwo: ...  # noqa: E701
+
+
+@dataclass
+class DataClassTestWithMethod:
+    value: Optional[int] = None
+
+    def multiply_by(self, multiplier: int):
+        if self.value:
+            self.value = self.value * multiplier
 
 
 base_data_class_rule: DataClassRuleDict = {
@@ -141,3 +153,35 @@ def test_prepare_data_class_settings_method():
         data_class_processor._data_class_methods
         == base_data_class_rule[DataClassRuleKeys.METHODS]
     )
+
+
+def test_data_class_return_without_method():
+    data_class_processor = DataClassProcessor()
+    data_class_processor.register_dataclass(DataClassTestWithMethod)
+    rule = deepcopy(base_data_class_rule)
+    rule[DataClassRuleKeys.NAME] = "data_class_test_with_method"
+    rule[DataClassRuleKeys.METHODS] = []
+    rule[DataClassRuleKeys.RECORD_CONVERSION_ARGUMENTS] = {"value": "input_value"}
+    result = data_class_processor.data_from_dataclass(
+        record={"input_value": 3}, rules=rule, record_convertor=basic_test_convertor()
+    )
+    assert result == {"value": 3}
+
+
+def test_data_class_return_with_method():
+    input_value = 4
+    input_multiplier = 2
+    data_class_processor = DataClassProcessor()
+    data_class_processor.register_dataclass(DataClassTestWithMethod)
+    rule = deepcopy(base_data_class_rule)
+    rule[DataClassRuleKeys.NAME] = "data_class_test_with_method"
+    rule[DataClassRuleKeys.METHODS] = [
+        {"multiply_by": {"multiplier": "input_multiplier"}}
+    ]
+    rule[DataClassRuleKeys.RECORD_CONVERSION_ARGUMENTS] = {"value": "input_value"}
+    result = data_class_processor.data_from_dataclass(
+        record={"input_value": input_value, "input_multiplier": input_multiplier},
+        rules=rule,
+        record_convertor=basic_test_convertor(),
+    )
+    assert result == {"value": input_value * input_multiplier}
