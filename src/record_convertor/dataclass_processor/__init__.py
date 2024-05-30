@@ -14,6 +14,8 @@ provided rules.
 from dataclasses import asdict, is_dataclass
 from typing import Any, Type
 
+from pydantic import BaseModel
+
 from ..package_settings import (
     DataclassInstance,
     DataClassRuleDict,
@@ -21,6 +23,27 @@ from ..package_settings import (
     RecordConvertorProtocol,
     class_name_in_snake_case,
 )
+
+def _is_dataclass(dataclass: type) -> bool:
+    """
+    Helper method to check if a class is a dataclass.
+    Returns True for default python dataclasses and Pydantic dataclasse.
+    Returns False in al other cases.
+    """
+    if is_dataclass(dataclass):
+        return True
+    if issubclass(dataclass, BaseModel):
+        return True
+    return False
+
+
+def _asdict(dataclass) -> dict:
+    if is_dataclass(dataclass):
+        return asdict(dataclass)
+    if isinstance(dataclass, BaseModel):
+        return dataclass.model_dump()
+    raise TypeError(f"Class {dataclass.__name__} is not a dataclass of a Pydantic c")
+
 
 
 class DataClassProcessor:
@@ -112,7 +135,7 @@ class DataClassProcessor:
         Raises:
             ValueError: If the provided class is not a dataclass.
         """
-        if not is_dataclass(dataclass):
+        if not _is_dataclass(dataclass):
             raise ValueError(f"class '{dataclass.__name__}' is not a dataclass")
         setattr(self, dataclass_name, dataclass)
 
@@ -162,7 +185,7 @@ class DataClassProcessor:
         """Create dict record to be returned."""
         dataclass_content = self._get_dataclass_content()
         dataclass_instance = self._get_dataclass_instance(dataclass_content)
-        return asdict(dataclass_instance)
+        return _asdict(dataclass_instance)
 
     def _get_dataclass_instance(self, dataclass_content: dict) -> DataclassInstance:
         """Create the dataclass instance and initiate the methods to be run."""
