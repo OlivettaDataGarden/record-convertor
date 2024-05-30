@@ -2,6 +2,7 @@ import json
 
 path = "tests/integration_test/data/"
 
+
 def itterator_test_data(test_file_name: str):
     """Method to provide an itterator over a list of test_data in a json file
 
@@ -13,12 +14,11 @@ def itterator_test_data(test_file_name: str):
     Yields:
         dict: dict containing test data with input, ouput and conversion rules
     """
-    with open(path+test_file_name) as json_file:
-
+    with open(path + test_file_name) as json_file:
         data = json.loads(json_file.read())
         for test in data["tests"]:
             yield {
                 "input_record": test["input_record"],
                 "rules": test["rules"],
-                "output_record": test["output_record"]
+                "output_record": test["output_record"],
             }

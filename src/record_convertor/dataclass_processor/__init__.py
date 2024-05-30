@@ -24,6 +24,7 @@ from ..package_settings import (
     class_name_in_snake_case,
 )
 
+
 def _is_dataclass(dataclass: type) -> bool:
     """
     Helper method to check if a class is a dataclass.
@@ -43,7 +44,6 @@ def _asdict(dataclass) -> dict:
     if isinstance(dataclass, BaseModel):
         return dataclass.model_dump()
     raise TypeError(f"Class {dataclass.__name__} is not a dataclass of a Pydantic c")
-
 
 
 class DataClassProcessor:

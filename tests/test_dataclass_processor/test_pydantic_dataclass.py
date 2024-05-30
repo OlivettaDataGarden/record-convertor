@@ -1,9 +1,7 @@
 from copy import deepcopy
-
 from typing import Optional
 
 from pydantic import BaseModel
-
 
 from record_convertor.dataclass_processor import DataClassProcessor
 from record_convertor.package_settings import DataClassRuleDict, DataClassRuleKeys
@@ -40,7 +38,6 @@ def test_private_register_pydantic_dataclass_method_adds_a_dataclass_to_the_clas
     data_class_processor._register_dataclass("test_class", DataClassTest)
     assert "test_class" in dir(data_class_processor)
     assert getattr(data_class_processor, "test_class") is DataClassTest  # noqa: B009
-
 
 
 def test_data_class_return_without_method():
