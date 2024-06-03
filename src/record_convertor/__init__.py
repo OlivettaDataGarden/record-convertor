@@ -101,9 +101,10 @@ class RecordConvertor:
             # check if the rule requires a change on the input record to be done
             # if rule is an input record update rule then proceed with the next rule.
             if self._is_dataclass_rule(rule=rule):
+                _, dataclass_rule = rule
                 return self.DATA_CLASS_PROCESSOR.data_from_dataclass(
                     record=self._input_record,
-                    rules=rule,  # type: ignore
+                    rules=dataclass_rule,  # type: ignore
                     record_convertor=self._copy,
                 )
 
@@ -221,3 +222,30 @@ class RecordConvertor:
                 pass
 
         return None
+
+
+class RecordConvertorWithRulesDict(RecordConvertor):
+    RULE_CLASS = RulesFromDict
+
+    def __init__(
+        self,
+        rule_dict: dict,
+        field_convertor: Optional[type[FieldConvertorProtocol]] = None,
+        date_formatter: Optional[type[DateFormatProtocol]] = None,
+        data_classes: Optional[list[type[DataclassInstance]]] = None,
+        command_class: Optional[type[ProcessCommand]] = None,
+    ):
+        self._rules = self.RULE_CLASS(rule_source=rule_dict).rules
+        # set instance of given or default field convertor class
+        self._field_convertor: FieldConvertorProtocol = (
+            field_convertor or self.DEFAULT_FIELD_CONVERTOR_CLASS
+        )()
+        # set instance of given or default date format class
+        self._date_formatter: DateFormatProtocol = (
+            date_formatter or self.DEFAULT_DATE_FORMAT_CLASS
+        )()
+        # set the dataclasses attribute as a dict with dataclass name as key and data
+        # the dataclass itself as value
+        dataclasses = data_classes or []
+        self.DATA_CLASS_PROCESSOR.register_data_classes(dataclasses=dataclasses)
+        self._command_class = command_class or self.COMMAND_CLASS

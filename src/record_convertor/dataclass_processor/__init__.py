@@ -160,8 +160,11 @@ class DataClassProcessor:
         """
         Set methods and their arguments to be used after the dataclass has been created.
         """
-        self._data_class_methods: list[dict[str, Any]] = rules.get(
-            DataClassRuleKeys.METHODS  # type: ignore
+        self._data_class_methods: list[dict[str, Any]] = (
+            rules.get(
+                DataClassRuleKeys.METHODS  # type: ignore
+            )
+            or []
         )
 
     def _set_dataclass_to_use(self, rules: DataClassRuleDict):

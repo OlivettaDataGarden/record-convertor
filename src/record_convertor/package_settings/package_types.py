@@ -27,6 +27,7 @@ class BaseConvertorKeys:
     ACTIONS: Literal["actions"] = "actions"
     ACTIONTYPE: Literal["action_type"] = "action_type"
     ACTIONVALUE: Literal["action_value"] = "action_value"
+    ACTIONTARGET: Literal["target_field_name"] = "target_field_name"
 
 
 class FormatDateConvKeys:
@@ -81,6 +82,7 @@ RulesDict = Union[
         str,
         Union[
             str,
+            dict,
             BaseRuleDict,
             FormatDateRuleDict,
             SkipRuleDict,

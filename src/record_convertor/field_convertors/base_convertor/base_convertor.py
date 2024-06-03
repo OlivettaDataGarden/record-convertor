@@ -144,18 +144,20 @@ class BaseFieldConvertor:
         self.record = record
         self.conversion_rule = conversion_rule
         self.field_name = conversion_rule[BaseConvertorKeys.FIELDNAME]
-        self.field_value = self._get_field(self.field_name)
-
+    
         actions = self.conversion_rule[BaseConvertorKeys.ACTIONS] or {}
         if self.all_conditions_true():
             for action_dict in actions:
+                target_field = action_dict.pop(
+                    BaseConvertorKeys.ACTIONTARGET, self.field_name)
+                self.field_value = self._get_field(self.field_name)
                 [[action, action_value]] = action_dict.items()
                 if action in dir(self):
                     field_value = getattr(self, action)(action_value)
                 else:
                     raise NotImplementedError(f"Action {action}")
                 if action not in ["remove"]:
-                    self.set_field_value(field_value)
+                    self.set_field_value(value=field_value, target_field=target_field)
 
         return self.record
 
@@ -391,7 +393,7 @@ class BaseFieldConvertor:
         # continue
         return True
 
-    def set_field_value(self, value):
+    def set_field_value(self, value, target_field: str):
         """
         sets a value to a nested field in the record.
 
@@ -403,7 +405,7 @@ class BaseFieldConvertor:
         returns none
 
         """
-        nested_field_names = self.field_name.split(".")
+        nested_field_names = target_field.split(".")
         first_field_name = nested_field_names.pop(0)
         # if it is not a nested field update first level field name and return
         if not nested_field_names:
