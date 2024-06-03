@@ -148,14 +148,15 @@ class BaseFieldConvertor:
         actions = self.conversion_rule[BaseConvertorKeys.ACTIONS] or {}
         if self.all_conditions_true():
             for action_dict in actions:
-                target_field = action_dict.pop(
-                    BaseConvertorKeys.ACTIONTARGET, self.field_name)
                 self.field_value = self._get_field(self.field_name)
                 [[action, action_value]] = action_dict.items()
                 if action in dir(self):
                     field_value = getattr(self, action)(action_value)
                 else:
                     raise NotImplementedError(f"Action {action}")
+
+                target_field = action_dict.pop(
+                    BaseConvertorKeys.ACTIONTARGET, self.field_name)
                 if action not in ["remove"]:
                     self.set_field_value(value=field_value, target_field=target_field)
 
