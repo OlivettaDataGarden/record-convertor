@@ -40,7 +40,7 @@ class _BaseConvertorClass:
         self.record = record
         self.conversion_rule = conversion_rule
         self.field_name = conversion_rule[BaseConvertorKeys.FIELDNAME]
-    
+
         actions = self.conversion_rule[BaseConvertorKeys.ACTIONS] or {}
         if self.all_conditions_true():
             # loop over all actions
@@ -49,7 +49,8 @@ class _BaseConvertorClass:
                 # remove any optional target_field from the action as the target_field
                 # setting is not an action in itself
                 optional_target_field = action_dict.pop(
-                    BaseConvertorKeys.ACTIONTARGET, None)
+                    BaseConvertorKeys.ACTIONTARGET, None
+                )
 
                 # retrieve single action and action value and execute
                 [[action, action_value]] = action_dict.items()
@@ -66,7 +67,6 @@ class _BaseConvertorClass:
 
         return self.record
 
-    
     def all_conditions_true(self) -> bool:
         """Returns True if all provided conditions are satisfied"""
         if conditions := self.conversion_rule.get(BaseConvertorKeys.CONDITION):

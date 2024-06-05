@@ -11,7 +11,7 @@ usage:
 """
 
 from copy import copy
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
 import jmespath
 from jmespath.exceptions import ParseError
@@ -38,7 +38,7 @@ from .rules_generator import RulesFromDict, RulesFromYAML  # NOQA: F401
 
 
 class RecordConvertor:
-    RULE_CLASS = RulesFromYAML
+    RULE_CLASS: type[Union[RulesFromYAML, RulesFromDict]] = RulesFromYAML
     EVALUATE_CLASS = EvaluateConditions
     DATA_CLASS_PROCESSOR: DataClassProcessor = DataClassProcessor()
     KEYS_IN_LOWER_CASE: bool = False

@@ -145,7 +145,7 @@ class InPlaceBasicConversions(_BaseConvertorClass):
         """
         multiplies the value in the given field by given value and sets it back to the
         given field.
-        
+
         example usage multiplies value in example_field_name with 10:
         {"$convert":
             "fieldname": "example_field_name"
@@ -163,7 +163,7 @@ class InPlaceBasicConversions(_BaseConvertorClass):
         """
         divides the value in the given field by given value and sets it back to the
         given field.
-        
+
         example usage diving value in example_field_name with 10:
         {"$convert":
             "fieldname": "example_field_name"

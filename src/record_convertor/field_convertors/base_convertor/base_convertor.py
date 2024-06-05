@@ -100,21 +100,6 @@ Availale conversion
 
 """
 
-import json
-from datetime import date, timedelta
-from typing import Any, Optional, Union
-
-import jmespath
-import phonenumbers
-from jmespath.exceptions import ParseError
-
-from ...package_settings import BaseConvertorKeys, BaseRuleDict, EvaluateConditions
-from .base_convertor_helpers import (
-    DataFromHTMLSnippet,
-    iso3116_from_alpha_3_country_code,
-    normalize_string,
-)
-
 from .data_structure_conversions import DataStructureConversions
 from .generic_conversions import GenericConversions
 from .in_place_basic_conversions import InPlaceBasicConversions
@@ -127,7 +112,5 @@ class BaseFieldConvertor(
     DataStructureConversions,
     GenericConversions,
     InPlaceBasicConversions,
-    KeyValueConversions
-
-):...
-    
+    KeyValueConversions,
+): ...  # NOQA: E701

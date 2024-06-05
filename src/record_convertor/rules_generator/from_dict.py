@@ -7,8 +7,6 @@ Classes:
 
 from typing import Dict, Union
 
-from ..package_settings import RulesDict
-
 
 class RulesFromDict:
     """
@@ -32,14 +30,19 @@ class RulesFromDict:
         rules (dict): Returns a dictionary representation of the YAML file.
     """
 
-    def __init__(self, rule_source: RulesDict):
+    RULE_SOURCE_TYPE = dict
+
+    def __init__(self, rule_source: Union[str, dict]):
         """
         Initializes the RulesFromYAML object with a YAML file source.
 
         Args:
-            rule_source (RULE_SOURCE_TYPE):
-                The filename, including path, of the YAMLfile.
+            rule_source (str):
+                The filename, including path, of the YAML file.
         """
+        if type(rule_source) is not self.RULE_SOURCE_TYPE:
+            raise TypeError(f"rule_source not of type {self.RULE_SOURCE_TYPE}")
+
         self._rule_source = rule_source
         self._dict: Dict = {}
         self._error: Union[bool, str] = False

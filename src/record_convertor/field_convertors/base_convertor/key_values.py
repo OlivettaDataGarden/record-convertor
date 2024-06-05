@@ -103,11 +103,7 @@ Availale conversion
 from datetime import date, timedelta
 from typing import Optional
 
-from record_convertor.field_convertors.base_convertor.base_convertor_helpers.html_parser import DataFromHTMLSnippet  # NOQA: E501
-
 from .base_convertor_helpers import _BaseConvertorClass
-
-__all__ = ["DataStructureConversions"]
 
 
 class KeyValueConversions(_BaseConvertorClass):
@@ -187,4 +183,3 @@ class KeyValueConversions(_BaseConvertorClass):
             return None
 
         return date.strftime(actual_date, "%Y-%m-%d")
-

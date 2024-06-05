@@ -37,7 +37,7 @@ class RulesFromYAML:
 
     RULE_SOURCE_TYPE = str
 
-    def __init__(self, rule_source: str):
+    def __init__(self, rule_source: Union[str, dict]):
         """
         Initializes the RulesFromYAML object with a YAML file source.
 
@@ -45,6 +45,8 @@ class RulesFromYAML:
             rule_source (str):
                 The filename, including path, of the YAML file.
         """
+        if type(rule_source) is not self.RULE_SOURCE_TYPE:
+            raise TypeError(f"rule_source not of type {self.RULE_SOURCE_TYPE}")
         self._rule_source = rule_source
         self._dict: Dict = {}
         self._error: Union[bool, str] = False

@@ -102,8 +102,10 @@ Availale conversion
 
 from typing import Any, Optional
 
-from record_convertor.field_convertors.base_convertor.base_convertor_helpers.html_parser import DataFromHTMLSnippet
-from record_convertor.field_convertors.base_convertor.base_convertor_helpers.string_helpers import normalize_string  # NOQA: E501
+from record_convertor.field_convertors.base_convertor.base_convertor_helpers import (
+    DataFromHTMLSnippet,
+    normalize_string,
+)
 
 from .base_convertor_helpers import _BaseConvertorClass
 
@@ -183,7 +185,7 @@ class DataStructureConversions(_BaseConvertorClass):
             return []
 
         return DataFromHTMLSnippet().to_list(self.field_value)
-    
+
     def select_object_from_list(self, action_value: tuple[str, Any]):
         """
         selects an object from a list if specific key in the object equals a
