@@ -100,34 +100,91 @@ Availale conversion
 
 """
 
-import json
 from datetime import date, timedelta
-from typing import Any, Optional, Union
+from typing import Optional
 
-import jmespath
-import phonenumbers
-from jmespath.exceptions import ParseError
+from record_convertor.field_convertors.base_convertor.base_convertor_helpers.html_parser import DataFromHTMLSnippet  # NOQA: E501
 
-from ...package_settings import BaseConvertorKeys, BaseRuleDict, EvaluateConditions
-from .base_convertor_helpers import (
-    DataFromHTMLSnippet,
-    iso3116_from_alpha_3_country_code,
-    normalize_string,
-)
+from .base_convertor_helpers import _BaseConvertorClass
 
-from .data_structure_conversions import DataStructureConversions
-from .generic_conversions import GenericConversions
-from .in_place_basic_conversions import InPlaceBasicConversions
-from .key_values import KeyValueConversions
-
-__all__ = ["BaseFieldConvertor"]
+__all__ = ["DataStructureConversions"]
 
 
-class BaseFieldConvertor(
-    DataStructureConversions,
-    GenericConversions,
-    InPlaceBasicConversions,
-    KeyValueConversions
+class KeyValueConversions(_BaseConvertorClass):
+    """
+    Class to perform conversions on a given record and return the updated
+    record
 
-):...
-    
+    args:
+        record (dict): record that needs some conversion action
+        conversion_rule (dict) :
+            instructions about the conversion. Should at least have
+                - fieldname -> which field will be converted
+                - actions -> list of actions to be applied
+                - conditions (optional) -> conditions required to
+                                           run the conversion
+
+    method to convert the record:
+        - convert
+            args: None
+            returns: record (dict) -> the converted record
+    """
+
+    def join_fields(self, action_value: list) -> str:
+        """Joins values from a list of fields."""
+        field_values = [self._get_field(field_name) for field_name in action_value]
+        return "".join(str(field_values))
+
+    def change_key_name_to(self, action_value):
+        """change the field name of a (nested) field"""
+        value = self.pop_nested_field(self.field_name)
+        self.field_name = action_value
+        return value
+
+    def date_of_today(self, action_value):
+        """returns date of today in format  YYYY-MM-DD"""
+        return date.strftime(date.today(), "%Y-%m-%d")
+
+    def fixed_value(self, action_value):
+        """returns the fixed value defined in the action dict"""
+        return action_value
+
+    def insert_key(self, action_value):
+        """Returns a retrieved from a field in the record
+
+        fieldname to retrieve from is defined in the action dict
+        """
+        return {action_value: self.field_value}
+
+    def add_value_from_field(self, action_value):
+        """Returns a retrieved from a field in the record
+
+        fieldname to retrieve from is defined in the action dict
+        """
+        return self._get_field(action_value)
+
+    def add_key_value_from_field(self, action_value):
+        """
+        Returns a dict with key value pairs where key is given
+        and value is the value for that key in the record
+        """
+        if not isinstance(action_value, list):
+            action_value = [action_value]
+
+        return {key: self._get_field(key) for key in action_value}
+
+    def days_ago_to_date(self, action_value) -> Optional[str]:
+        """returns the date of a given number of days ago
+
+        date is returned in format YYYY-MM-DD
+        """
+        if not self.field_value:
+            return None
+
+        try:
+            actual_date = date.today() - timedelta(days=int(self.field_value))
+        except ValueError:
+            return None
+
+        return date.strftime(actual_date, "%Y-%m-%d")
+

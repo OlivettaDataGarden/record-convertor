@@ -100,34 +100,66 @@ Availale conversion
 
 """
 
-import json
-from datetime import date, timedelta
-from typing import Any, Optional, Union
 
-import jmespath
 import phonenumbers
-from jmespath.exceptions import ParseError
 
-from ...package_settings import BaseConvertorKeys, BaseRuleDict, EvaluateConditions
-from .base_convertor_helpers import (
-    DataFromHTMLSnippet,
+from record_convertor.field_convertors.base_convertor.base_convertor_helpers.countries import (
     iso3116_from_alpha_3_country_code,
-    normalize_string,
 )
 
-from .data_structure_conversions import DataStructureConversions
-from .generic_conversions import GenericConversions
-from .in_place_basic_conversions import InPlaceBasicConversions
-from .key_values import KeyValueConversions
+from .base_convertor_helpers import _BaseConvertorClass
 
-__all__ = ["BaseFieldConvertor"]
+__all__ = ["GenericConversions"]
 
 
-class BaseFieldConvertor(
-    DataStructureConversions,
-    GenericConversions,
-    InPlaceBasicConversions,
-    KeyValueConversions
+class GenericConversions(_BaseConvertorClass):
+    """
+    Class to perform conversions on a given record and return the updated
+    record
 
-):...
-    
+    args:
+        record (dict): record that needs some conversion action
+        conversion_rule (dict) :
+            instructions about the conversion. Should at least have
+                - fieldname -> which field will be converted
+                - actions -> list of actions to be applied
+                - conditions (optional) -> conditions required to
+                                           run the conversion
+
+    method to convert the record:
+        - convert
+            args: None
+            returns: record (dict) -> the converted record
+    """
+
+    def get_country_code_from_phone_nr(self, action_value):
+        phone_nr = self._get_field(action_value)
+        phone_object = None
+        if phone_nr:
+            try:
+                phone_object = phonenumbers.parse(phone_nr)
+            except phonenumbers.phonenumberutil.NumberParseException:
+                return None
+
+            if phone_object and phone_object.country_code:
+                return phonenumbers.region_codes_for_country_code(
+                    phone_object.country_code
+                )[0]
+            else:
+                # ensure the field is empty if no country code can be found
+                return None
+
+    def remove(self, action_value):
+        """change remove a (nested) field"""
+        self.pop_nested_field(self.field_name)
+        return None
+
+    def alpha3_to_iso3116_cc(self, action_value):
+        """converts a alpha 3 country code to a iso3116 country code"""
+        field_value = self.field_value
+        if not isinstance(field_value, str):
+            raise TypeError(
+                f"filed_value is of type `{type(field_value)}` "
+                "but should be of type `str`"
+            )
+        return iso3116_from_alpha_3_country_code(field_value)
