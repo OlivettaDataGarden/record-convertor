@@ -93,6 +93,11 @@ class RecordConvertor:
             if self._skip_this_record(rule):
                 return self.DEFAULT_VALUE
 
+            # in case of a skip rule that is invalidated in the previous check (ie.
+            # record can not be skipped) no further processing of this rule is needed.
+            if self._is_skip_rule(rule):
+                continue
+
             # check if the rule requires a change on the input record to be done
             # if rule is an input record update rule then proceed with the next rule.
             if self._change_field_in_input_record_if_required(rule=rule):
@@ -122,9 +127,12 @@ class RecordConvertor:
             output_record_key, output_record_value = rule
 
             if isinstance(output_record_value, dict):
+                # output_record_value is the nested rule set. So a new recordconvertor
+                # with the new rule setis defined
                 nested_record_covertor = self.get_record_convertor_copy_with_new_rules(
                     output_record_value
                 )
+                # add the result of that new record convertor to the output record.
                 output_record[output_record_key] = nested_record_covertor.convert(
                     record=self._input_record
                 )
@@ -198,16 +206,23 @@ class RecordConvertor:
         rule_key, _ = rule
         return rule_key[0] == "$"
 
+
+    def _is_skip_rule(self, rule: tuple) -> bool:
+        rule_key, rule_value = rule
+        if RecConvKeys.SKIP in rule_key.lower():
+            return True
+        return False
+
     def _skip_this_record(self, rule: tuple) -> bool:
         rule_key, rule_value = rule
-        if not rule_key.lower() == RecConvKeys.SKIP:
-            return False
-        skip_rule: SkipRuleDict = rule_value
-        conditions: Optional[ConditionsDict] = skip_rule[SkipConvKeys.CONDITION]
-        fieldname: Optional[str] = skip_rule.get(SkipConvKeys.FIELDNAME)
-        field_value = self._get_field(fieldname)
+        if self._is_skip_rule(rule):
+            skip_rule: SkipRuleDict = rule_value
+            conditions: Optional[ConditionsDict] = skip_rule[SkipConvKeys.CONDITION]
+            fieldname: Optional[str] = skip_rule.get(SkipConvKeys.FIELDNAME)
+            field_value = self._get_field(fieldname)
+            return self.EVALUATE_CLASS(conditions, field_value).evaluate()
 
-        return self.EVALUATE_CLASS(conditions, field_value).evaluate()
+        return False
 
     def _get_field(self, key: Optional[str]) -> Any:
         if key:
