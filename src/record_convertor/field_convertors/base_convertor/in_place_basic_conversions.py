@@ -159,6 +159,23 @@ class InPlaceBasicConversions(_BaseConvertorClass):
             return None
         return value_to_multiply * action_value
 
+
+    def round(self, action_value: int):
+        """
+        divides the value in the given field by given value and sets it back to the
+        given field.
+
+        example usage diving value in example_field_name with 10:
+        {"$convert":
+            "fieldname": "example_field_name"
+            "actions": [{"divide_by" : 10}]
+        }
+        """
+        value_to_divide = self._get_float_from_field_value()
+        if value_to_divide is None:
+            return None
+        return round(value_to_divide / action_value)
+
     def divide_by(self, action_value):
         """
         divides the value in the given field by given value and sets it back to the

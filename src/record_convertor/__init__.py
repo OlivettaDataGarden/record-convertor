@@ -206,7 +206,6 @@ class RecordConvertor:
         rule_key, _ = rule
         return rule_key[0] == "$"
 
-
     def _is_skip_rule(self, rule: tuple) -> bool:
         rule_key, rule_value = rule
         if RecConvKeys.SKIP in rule_key.lower():
