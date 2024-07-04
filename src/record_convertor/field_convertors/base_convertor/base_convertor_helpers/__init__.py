@@ -40,6 +40,7 @@ class _BaseConvertorClass:
         self.record = record
         self.conversion_rule = conversion_rule
         self.field_name = conversion_rule[BaseConvertorKeys.FIELDNAME]
+        self.field_value = self._get_field(self.field_name)
 
         actions = self.conversion_rule[BaseConvertorKeys.ACTIONS] or {}
         if self.all_conditions_true():

@@ -147,6 +147,12 @@ class EvaluateConditions:
 
         return self.value in self.provided_conditions["in_list"]
 
+    def not_in_list(self) -> bool:
+        if not isinstance(self.provided_conditions["not_in_list"], list):
+            return False
+
+        return self.value not in self.provided_conditions["not_in_list"]
+
     def does_not_equal(self) -> bool:
         return self.value != self.provided_conditions["does_not_equal"]
 

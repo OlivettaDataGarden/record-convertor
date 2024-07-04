@@ -14,6 +14,7 @@ class ConditionsDict(TypedDict):
     equals: Optional[Any]
     does_not_equal: Optional[Any]
     in_list: Optional[list]
+    not_in_list: Optional[list]
     contains: Optional[Any]
     does_not_contain: Optional[Any]
 

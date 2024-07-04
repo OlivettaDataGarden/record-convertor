@@ -159,7 +159,6 @@ class InPlaceBasicConversions(_BaseConvertorClass):
             return None
         return value_to_multiply * action_value
 
-
     def round(self, action_value: int):
         """
         divides the value in the given field by given value and sets it back to the
@@ -171,10 +170,13 @@ class InPlaceBasicConversions(_BaseConvertorClass):
             "actions": [{"divide_by" : 10}]
         }
         """
-        value_to_divide = self._get_float_from_field_value()
-        if value_to_divide is None:
+        value_to_round = self._get_float_from_field_value()
+        if value_to_round is None:
             return None
-        return round(value_to_divide / action_value)
+        # extra check needed because round(1.1, 0) returns 1.0 and round(1.1) returns 1
+        if action_value == 0:
+            return round(value_to_round)
+        return round(value_to_round, action_value)
 
     def divide_by(self, action_value):
         """
@@ -225,3 +227,8 @@ class InPlaceBasicConversions(_BaseConvertorClass):
         """removes all query parameters from a url"""
         if isinstance(self.field_value, str):
             return self.field_value.split("?")[0]
+
+    def string_begin(self, action_value):
+        """returns left part if the string up to `action_value` index."""
+        if isinstance(self.field_value, str):
+            return self.field_value[0:action_value]
