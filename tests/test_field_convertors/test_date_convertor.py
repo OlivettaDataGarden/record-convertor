@@ -10,7 +10,6 @@ from data.data_date_convertor_tests import (
     BASE_PARAMS_YYYY_MM_DD_UNDERSCORE,
     BASE_PARAMS_YYYY_MM_DD_Time,
 )
-
 from record_convertor.field_convertors import DateFieldConvertor
 
 

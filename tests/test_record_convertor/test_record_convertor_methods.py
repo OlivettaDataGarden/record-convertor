@@ -1,7 +1,6 @@
 import jmespath
 import pytest
 from jmespath.exceptions import ParseError
-
 from record_convertor import EvaluateConditions, RecordConvertor
 
 TEST_RULES = {"rule1": "test"}

@@ -1,7 +1,6 @@
 from datetime import datetime
 
 import pytest
-
 from record_convertor.package_settings import EvaluateConditions
 
 

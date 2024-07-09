@@ -2,7 +2,6 @@ from copy import deepcopy
 from typing import Optional
 
 from pydantic import BaseModel
-
 from record_convertor.dataclass_processor import DataClassProcessor
 from record_convertor.package_settings import DataClassRuleDict, DataClassRuleKeys
 

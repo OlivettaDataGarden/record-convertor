@@ -36,7 +36,6 @@ from data.data_process_command_tests import (
     PARAMS_TO_LIST,
     PARAMS_TO_LIST_DYNAMIC,
 )
-
 from record_convertor.command_processor import ProcessCommand
 
 

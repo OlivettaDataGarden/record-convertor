@@ -3,7 +3,6 @@ from dataclasses import dataclass
 from typing import Optional
 
 import pytest
-
 from record_convertor.dataclass_processor import DataClassProcessor
 from record_convertor.package_settings import DataClassRuleDict, DataClassRuleKeys
 

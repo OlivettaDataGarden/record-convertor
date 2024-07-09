@@ -43,7 +43,6 @@ from data.data_field_convertor_tests import (
     URL_PARAMS,
     URL_PARAMS_WITH_CONDITION,
 )
-
 from record_convertor.field_convertors import BaseFieldConvertor
 
 convertor = BaseFieldConvertor()

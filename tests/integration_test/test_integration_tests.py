@@ -1,7 +1,6 @@
 from typing import Optional
 
 from data._test_data import itterator_test_data
-
 from record_convertor import (
     BaseFieldConvertor,
     DateFieldConvertor,
