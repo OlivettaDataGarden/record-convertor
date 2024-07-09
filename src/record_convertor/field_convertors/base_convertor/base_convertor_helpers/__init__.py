@@ -1,3 +1,4 @@
+from copy import deepcopy
 from typing import Any, Optional
 
 import jmespath
@@ -45,7 +46,7 @@ class _BaseConvertorClass:
         actions = self.conversion_rule[BaseConvertorKeys.ACTIONS] or {}
         if self.all_conditions_true():
             # loop over all actions
-            for action_dict in actions:
+            for action_dict in deepcopy(actions):
                 self.field_value = self._get_field(self.field_name)
                 # remove any optional target_field from the action as the target_field
                 # setting is not an action in itself
