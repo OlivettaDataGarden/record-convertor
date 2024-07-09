@@ -1,11 +1,10 @@
-=============
-Error Manager
-=============
+================
+Record Convertor
+================
 
-A lightweight implementation of a manager for error messages throughout your
-project. Allows you to easily define and register error codes and messages.
-Enable easy access to a single list of registerd error codes and messages
-throughout your project.
+A toolbox for rule based conversion of input records to desired output formats using a YAML config file as input.
+Package was created to convert records of same data type from different sources (and thus different structures)
+to a singel validated stucture.
 
 .. start-badges
 
@@ -24,33 +23,25 @@ throughout your project.
     :target: https://errors.readthedocs.io/
     :alt: Documentation Status
 
-.. |travis| image:: https://api.travis-ci.com/MaartendeRuyter/errors.svg?branch=master
-    :alt: Travis-CI Build Status
-    :target: https://travis-ci.com/github/MaartendeRuyter/errors
-
-.. |requires| image:: https://requires.io/github/MaartendeRuyter/errors/requirements.svg?branch=master
-    :alt: Requirements Status
-    :target: https://requires.io/github/MaartendeRuyter/errors/requirements/?branch=master
-
 .. |codecov| image:: https://codecov.io/gh/MaartendeRuyter/errors/branch/master/graphs/badge.svg?branch=master
     :alt: Coverage Status
     :target: https://codecov.io/github/MaartendeRuyter/errors
 
 .. |version| image:: https://img.shields.io/pypi/v/error-manager.svg
     :alt: PyPI Package latest release
-    :target: https://pypi.org/project/error-manager
+    :target: https://pypi.org/project/record-convertor
 
 .. |wheel| image:: https://img.shields.io/pypi/wheel/error-manager.svg
     :alt: PyPI Wheel
-    :target: https://pypi.org/project/error-manager
+    :target: https://pypi.org/project/record-convertor
 
 .. |supported-versions| image:: https://img.shields.io/pypi/pyversions/error-manager.svg
     :alt: Supported versions
-    :target: https://pypi.org/project/error-manager
+    :target: https://pypi.org/project/record-convertor
 
-.. |commits-since| image:: https://img.shields.io/github/commits-since/MaartendeRuyter/errors/v0.1.0.svg
+.. |commits-since| image:: https://img.shields.io/github/commits-since/MaartendeRuyter/record-convertor/v0.1.0.svg
     :alt: Commits since latest release
-    :target: https://github.com/MaartendeRuyter/errors/compare/v0.1.0...master
+    :target: https://github.com/OlivettaDataGarden/record-convertor/compare/v0.1.0...master
 
 
 .. end-badges
@@ -63,18 +54,14 @@ Installation
 
 ::
 
-    pip install error-manager
+    pip install record-convertor
 
-You can also install the in-development version with::
-
-    pip install https://github.com/MaartendeRuyter/errors/archive/master.zip
 
 
 Main usecases
 =============
-Error manager provides you with a ``ListErrors`` class to retrieve your
-custom error codes and descriptions throughout your project::
-
+The record-convertor package provides s 
+ 
     # retrieve customer defined ErrorCode object form ``ListErrors`` class
     >>> from errors import ListErrors
     >>> error = ListErrors.COULD_NOT_FIND_ERROR_CODE
