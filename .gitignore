@@ -1,7 +1,7 @@
 # Geodatagarden Standards
 todo.txt
 architecture.txt
-
+**/.DS_Store
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
