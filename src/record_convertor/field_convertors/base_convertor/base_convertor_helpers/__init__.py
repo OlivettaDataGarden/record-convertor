@@ -103,15 +103,21 @@ class _BaseConvertorClass:
         # updated (i.e. the last field name in thel list).
         last_field = nested_field_names.pop()
 
-        # find the nested dict in whih the last_field is a (nested) key
+        # find the top level nested dict in whih the last_field is a (nested) key
+        # if this nested dict does not yet exist then create it
         field_value = self.record.get(first_field_name, None)
         if field_value is None:
-            return None
+            field_value = {}
+            self.record[first_field_name] = field_value
 
-        # with the list of nested field name we dig deeper into the
+        # with the list of nested field names we dig deeper into the
         # structure to get to the dict containing the last field name
+        # if the nested dict structure does not yet exist it will be created
         for field_name in nested_field_names:
-            field_value = field_value.get(field_name, {})
+            field_value = field_value.get(field_name, None)
+            if field_value is None:
+                field_value = {}
+                self.record[first_field_name] = field_value
 
         # update that value of `last_field` in that dict
         if field_value is not None:

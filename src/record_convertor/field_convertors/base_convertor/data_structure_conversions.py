@@ -157,6 +157,7 @@ class DataStructureConversions(_BaseConvertorClass):
 
         if update_dict := self._get_field(action_value):
             result.update(update_dict)
+
         return result
 
     def add_data_from_list_of_dict(self, action_value) -> dict:
