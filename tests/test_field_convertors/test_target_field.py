@@ -65,4 +65,7 @@ def test_to_update_nested_target_field_option_true():
         },
     }
     converted_record = convertor.convert_field(**test_set)
-    assert converted_record["target_field"]["nested_field"] == {"key1": "a", "key2": "a"}
+    assert converted_record["target_field"]["nested_field"] == {
+        "key1": "a",
+        "key2": "a",
+    }

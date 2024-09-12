@@ -40,7 +40,7 @@ def _is_dataclass(dataclass: type) -> bool:
 
 def _asdict(dataclass) -> dict:
     if is_dataclass(dataclass):
-        return asdict(dataclass)
+        return asdict(dataclass) # type: ignore
     if isinstance(dataclass, BaseModel):
         return dataclass.model_dump()
     raise TypeError(f"Class {dataclass.__name__} is not a dataclass of a Pydantic c")
