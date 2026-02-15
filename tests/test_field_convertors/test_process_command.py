@@ -35,6 +35,7 @@ from data.data_process_command_tests import (
     PARAMS_TO_INT_STRIP_STR,
     PARAMS_TO_LIST,
     PARAMS_TO_LIST_DYNAMIC,
+    ConvertRecordTest,
 )
 from record_convertor.command_processor import ProcessCommand
 
@@ -246,3 +247,103 @@ def test_current_year():
     """test current_year"""
     processor = field_processor(PARAMS_CURRENT_YEAR)
     assert processor.get_value() == str(datetime.now().year)
+
+
+def test_to_int_with_none_field():
+    """test to_int returns None when field value is None"""
+    params = {
+        "record": {},
+        "record_convertor": ConvertRecordTest,
+        "process_command": "$to_int",
+        "process_args": {"field_name": "nonexistent", "strip": ["."]},
+    }
+    processor = field_processor(params)
+    assert processor.get_value() is None
+
+
+def test_from_list_with_none_field():
+    """test from_list returns empty list when list_field_name is missing"""
+    params = {
+        "record": {},
+        "record_convertor": ConvertRecordTest,
+        "process_command": "$from_list",
+        "process_args": {
+            "list_field_name": "nonexistent",
+            "target_field1": "field1",
+        },
+    }
+    processor = field_processor(params)
+    assert processor.get_value() == []
+
+
+def test_key_value_valid():
+    """test key_value returns correct key-value dict"""
+    params = {
+        "record": {"field1": "value1"},
+        "record_convertor": ConvertRecordTest,
+        "process_command": "$key_value",
+        "process_args": {"key": "my_key", "value": "field1"},
+    }
+    processor = field_processor(params)
+    assert processor.get_value() == {"my_key": "value1"}
+
+
+def test_key_value_missing_args():
+    """test key_value raises KeyError when key or value args are missing"""
+    params = {
+        "record": {"field1": "value1"},
+        "record_convertor": ConvertRecordTest,
+        "process_command": "$key_value",
+        "process_args": {"key": "my_key"},
+    }
+    processor = field_processor(params)
+    with pytest.raises(KeyError):
+        processor.get_value()
+
+
+def test_int_from_string_missing_seperators():
+    """test int_from_string returns None when seperators arg is missing"""
+    params = {
+        "record": {"field1": "123 EUR"},
+        "record_convertor": ConvertRecordTest,
+        "process_command": "$int_from_string",
+        "process_args": {"field_name": "field1"},
+    }
+    processor = field_processor(params)
+    assert processor.get_value() is None
+
+
+def test_int_from_string_non_string_field():
+    """test int_from_string returns None when field value is not a string"""
+    params = {
+        "record": {"field1": 123},
+        "record_convertor": ConvertRecordTest,
+        "process_command": "$int_from_string",
+        "process_args": {"field_name": "field1", "seperators": [" "]},
+    }
+    processor = field_processor(params)
+    assert processor.get_value() is None
+
+
+def test_split_field_missing_seperator():
+    """test split_field returns None when seperator arg is missing"""
+    params = {
+        "record": {"field1": "abc_def"},
+        "record_convertor": ConvertRecordTest,
+        "process_command": "$split_field",
+        "process_args": {"field_name": "field1", "index": 0},
+    }
+    processor = field_processor(params)
+    assert processor.get_value() is None
+
+
+def test_split_field_none_field():
+    """test split_field returns None when field does not exist"""
+    params = {
+        "record": {},
+        "record_convertor": ConvertRecordTest,
+        "process_command": "$split_field",
+        "process_args": {"field_name": "nonexistent", "seperator": "_", "index": 0},
+    }
+    processor = field_processor(params)
+    assert processor.get_value() is None

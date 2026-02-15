@@ -261,3 +261,60 @@ def test_date_not_today_returns_false_with_today_value(conditions):
     conditions.provided_conditions = {"date_not_today": None}
     conditions.value = datetime.today().strftime("%Y-%m-%d")
     assert conditions.evaluate() is False
+
+
+def test_in_list_with_non_list_arg(conditions):
+    """test in_list returns False when condition arg is not a list"""
+    conditions.provided_conditions = {"in_list": "not_a_list"}
+    conditions.value = "some_value"
+    assert conditions.evaluate() is False
+
+
+def test_not_in_list_true(conditions):
+    """test not_in_list returns True when value is not in the list"""
+    conditions.provided_conditions = {"not_in_list": ["01", "02"]}
+    conditions.value = "03"
+    assert conditions.evaluate()
+
+
+def test_not_in_list_false(conditions):
+    """test not_in_list returns False when value is in the list"""
+    conditions.provided_conditions = {"not_in_list": ["01", "02"]}
+    conditions.value = "01"
+    assert conditions.evaluate() is False
+
+
+def test_not_in_list_with_non_list_arg(conditions):
+    """test not_in_list returns False when condition arg is not a list"""
+    conditions.provided_conditions = {"not_in_list": "string"}
+    conditions.value = "some_value"
+    assert conditions.evaluate() is False
+
+
+def test_contains_with_non_string_non_list_value(conditions):
+    """test contains returns False when value is not a string or list"""
+    conditions.provided_conditions = {"contains": "test"}
+    conditions.value = 123
+    assert conditions.evaluate() is False
+
+
+def test_contains_with_list_value(conditions):
+    """test contains returns True when value is a list containing the item"""
+    conditions.provided_conditions = {"contains": "item1"}
+    conditions.value = ["item1", "item2"]
+    assert conditions.evaluate()
+
+
+def test_does_not_contain_with_none_arg(conditions):
+    """test does_not_contain raises ValueError when condition arg is None"""
+    conditions.provided_conditions = {"does_not_contain": None}
+    conditions.value = "test_value"
+    with pytest.raises(ValueError):
+        conditions.evaluate()
+
+
+def test_does_not_contain_with_non_string_non_list_value(conditions):
+    """test does_not_contain returns False when value is not a string or list"""
+    conditions.provided_conditions = {"does_not_contain": "test"}
+    conditions.value = 123
+    assert conditions.evaluate() is False
