@@ -43,6 +43,7 @@ dev = [
     "ruff>=0.4.3",
     "flake8==7.0.0",
     "flake8-bugbear==24.4.26",
+    "tox-uv",
 ]
 
 [project.urls]
