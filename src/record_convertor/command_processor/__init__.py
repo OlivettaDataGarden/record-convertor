@@ -177,8 +177,10 @@ class ProcessCommand:
         amount = self._get_field(field_name)
         if not amount:
             return None
-        remove_list = process_args.get("strip", None)
-        if isinstance(remove_list, (str, int)):
+        remove_list = process_args.get("strip")
+        if remove_list is None:
+            remove_list = []
+        elif isinstance(remove_list, (str, int)):
             remove_list = [str(remove_list)]
         for item in remove_list:
             amount = amount.replace(item, "")
