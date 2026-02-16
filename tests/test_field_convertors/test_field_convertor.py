@@ -371,3 +371,34 @@ def test_convert_multiply_str():
     """
     converted_record = convertor.convert_field(**deepcopy(PARAMS_MULTIPLY_STR))
     assert converted_record == {"tx": None}
+
+
+def test_country_code_from_none_phone_field():
+    """
+    test get_country_code_from_phone_nr returns None when the phone field
+    does not exist in the record
+    """
+    params = {
+        "record": {"other_field": "value"},
+        "conversion_rule": {
+            "fieldname": "country_code",
+            "actions": [{"get_country_code_from_phone_nr": "nonexistent_field"}],
+        },
+    }
+    converted_record = convertor.convert_field(**params)
+    assert converted_record["country_code"] is None
+
+
+def test_alpha3_to_iso3116_cc_with_non_string():
+    """
+    test alpha3_to_iso3116_cc raises TypeError when field value is not a string
+    """
+    params = {
+        "record": {"cc": 123},
+        "conversion_rule": {
+            "fieldname": "cc",
+            "actions": [{"alpha3_to_iso3116_cc": None}],
+        },
+    }
+    with pytest.raises(TypeError):
+        convertor.convert_field(**params)

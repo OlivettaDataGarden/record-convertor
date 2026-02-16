@@ -167,6 +167,18 @@ def test_data_class_return_without_method():
     assert result == {"value": 3}
 
 
+def test_asdict_with_non_dataclass_raises_type_error():
+    """test _asdict raises TypeError when passed a non-dataclass, non-Pydantic instance"""
+    from record_convertor.dataclass_processor import _asdict
+
+    class RegularClass:
+        __name__ = "RegularClass"
+
+    instance = RegularClass()
+    with pytest.raises(TypeError):
+        _asdict(instance)
+
+
 def test_data_class_return_with_method():
     input_value = 4
     input_multiplier = 2

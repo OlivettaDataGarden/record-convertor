@@ -2,6 +2,57 @@
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
+[project]
+name = "record-convertor"
+version = "1.1.6"
+description = "Converts structure, keys and fields from a record according to predefined rules"
+readme = { file = "README.rst", content-type = "text/x-rst" }
+license = "LGPL-3.0-or-later"
+authors = [
+    { name = "Maarten de Ruyter", email = "maarten@geodatagarden.com" },
+]
+requires-python = ">=3.10"
+classifiers = [
+    "Intended Audience :: Developers",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "jmespath",
+    "phonenumbers",
+    "unidecode",
+    "pyyaml",
+    "pydantic",
+]
+
+[project.optional-dependencies]
+dev = [
+    "build",
+    "tox",
+    "pre-commit",
+    "pytest",
+    "pytest-cov",
+    "pytest-mock",
+    "isort",
+    "mypy",
+    "types-PyYAML",
+    "ruff>=0.4.3",
+    "flake8==7.0.0",
+    "flake8-bugbear==24.4.26",
+    "tox-uv",
+]
+
+[project.urls]
+Homepage = "https://github.com/OlivettaDataGarden/record-convertor"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+exclude = ["tests*"]
+
 [tool.ruff]
 exclude = [".venv_rc"]
 line-length = 88
@@ -12,3 +63,30 @@ profile = "black"
 line_length = 88
 multi_line_output = 3
 include_trailing_comma = true
+
+[tool.mypy]
+python_version = "3.12"
+warn_unused_configs = true
+show_error_context = true
+pretty = true
+namespace_packages = true
+check_untyped_defs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--cov --strict-markers"
+xfail_strict = true
+
+[tool.coverage.run]
+source = ["record_convertor"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+
+[tool.coverage.paths]
+source = [
+    "src/record_convertor",
+    "*/site-packages/record_convertor",
+]

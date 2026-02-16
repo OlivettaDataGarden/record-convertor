@@ -157,3 +157,42 @@ def test_skip_method_returns_false_if_skip_in_key_and_confition_is_false():
     record_convertor = basic_test_convertor()
     record_convertor.__class__.EVALUATE_CLASS = EveluateConditionsAlwaysToFalse
     assert not record_convertor._skip_this_record(rule=("$SKIP", SKIP_RULE))
+
+
+##########################################
+# Test skip rule that doesn't match      #
+##########################################
+
+
+def test_skip_rule_non_matching_continues_processing():
+    """
+    test that a $skip rule with a non-matching condition does not skip the record
+    and continues processing subsequent rules
+    """
+    from record_convertor import RecordConvertorWithRulesDict
+
+    rules = {
+        "$SKIP": {"fieldname": "field1", "condition": {"equals": "skip_me"}},
+        "output_field": "field1",
+    }
+    record = {"field1": "keep_me"}
+    result = RecordConvertorWithRulesDict(rule_dict=rules).convert(record=record)
+    assert result == {"output_field": "keep_me"}
+
+
+###########################################
+# Test RecordConvertorWithRulesDict class #
+###########################################
+
+
+def test_record_convertor_with_rules_dict_basic():
+    """
+    test that RecordConvertorWithRulesDict can be instantiated with a dict
+    and convert a record correctly
+    """
+    from record_convertor import RecordConvertorWithRulesDict
+
+    rules = {"name": "full_name", "age": "person_age"}
+    record = {"full_name": "John Doe", "person_age": 30}
+    result = RecordConvertorWithRulesDict(rule_dict=rules).convert(record=record)
+    assert result == {"name": "John Doe", "age": 30}

@@ -1,114 +1,216 @@
 =====
 Usage
 =====
-The error-manager module provides your project with
-	- a single way to define and register a default project error code
-	- add specific error data to a default error code when needed
-	- a enumator class to group errors for a specific domain in your project
-	- a ErrorList class to retrieve error descriptions from error codes
+
+Installation
+------------
+
+Install from PyPI::
+
+    pip install record-convertor
+
+Import the main classes:
+
+.. code-block:: python
+
+    from record_convertor import RecordConvertor, RecordConvertorWithRulesDict
 
 
-Defining an error code
-----------------------
-The error-manager package provide a simple non mutable dataclass ErrorCode
-that should be used to define error codes::
+Basic Concepts
+--------------
 
-	from errors import ErrorCode
+A **rules dict** maps output field names to instructions for how to derive their values
+from the input record. The simplest rule is a direct field mapping:
 
-	MY_DEFAULT_ERROR_CODE = ErrorCode(
-		code='ERR_MYERR_0001',
-		description='my default error code'
-	)
+.. code-block:: python
 
-Register an error code
-----------------------
-Once the error code is defined it can be registered against the ``ListErrors``
-class using ``register_error()`` ::
+    rules = {
+        "output_field": "input_field",
+    }
 
-	from errors import ListErrors
+For nested input data, use dot-separated paths (powered by JMESPath):
 
-	ListErrors.register_error(
-	    error_key = 'MY_DEFAULT_ERROR_CODE',
-	    error  = MY_DEFAULT_ERROR_CODE
-	)
+.. code-block:: python
 
+    rules = {
+        "brand_name": "item.brand.name",       # nested dict access
+        "first_tag": "item.tags[0]",            # list index access
+    }
 
-Retrieving an error code
-------------------------
-After registration the ``ErrorCode`` instance be retrieved from the
-``ListErrors`` class using the ``error_key`` throughout your project::
+Beyond simple mappings, rules can include:
 
-	 from errors import ListErrors
-	 error = ListErrors.MY_DEFAULT_ERROR_CODE
+- **Field conversions** (``$convert``) — transform values in-place on the input record
+- **Date formatting** (``$format_date``) — convert between date formats
+- **Commands** (``$fixed_value``, ``$join``, ``$point``, etc.) — compute output values
+- **Dataclass processing** (``$dataclass``) — run records through Pydantic/dataclass models
+- **Skip rules** (``$skip``) — conditionally skip the entire record
+- **Conditions** — control when conversions or commands execute
 
 
-Retrieving error description
-----------------------------
-In case you have only persisted the error code without the error description
-you can use ``ListErrors`` class method ``error_description`` to retrieve the
-error description.::
+Using Dict Rules
+----------------
 
-	>>> from errors import ListErrors
-	>>> ListErrors.error_description('ERR_MYERR_0001')
-	'my default error code'
+The simplest approach uses ``RecordConvertorWithRulesDict`` with a plain dict:
 
+.. code-block:: python
 
-Enumarator with error Codes
----------------------------
-When needed you can group a set of error codes for a specific part of your
-project by using ``FunctionalErrorsBaseClass``::
+    from record_convertor import RecordConvertorWithRulesDict
 
-	from errors.base import FunctionalErrorsBaseClass
+    rules = {
+        "name": "item.name",
+        "city": "address.city",
+    }
 
-	class MyErrors(FunctionalErrorsBaseClass):
-	    """Class to define enumerator with functional errors."""
-	    CONNECTIVITY_ERROR = ErrorCode(
-	        code='GD_NETW_0001',
-	        description='Network connectivity issues')
-
-	    INVALID_XML_IN_RESPONSE = ErrorCode(
-	        code='GD_CONV_00201',
-	        description='Response contains invalid XML')
-
-	    INVALID_JSON_IN_RESPONSE = ErrorCode(
-	        code='GD_CONV_00101',
-	        description='Response contains invalid JSON')
-
-Register an ErrorCodes enumerator
----------------------------------
-This class can then be registered in one go against the ``ListErrors`` class
-using class method ``register_errors()``::
-
-	>>> from errors import ListErrors
-	>>> ListErrors.register_errors(MyErrors)
-	>>> ListErrors.CONNECTIVITY_ERROR
-	ErrorCode(code='GD_NETW_0001', description='Network connectivity issues',
-	error_data=<class 'dict'>)
+    convertor = RecordConvertorWithRulesDict(rule_dict=rules)
+    result = convertor.convert({"item": {"name": "Shop"}, "address": {"city": "Amsterdam"}})
+    # {"name": "Shop", "city": "Amsterdam"}
 
 
-Adding data to the error
-------------------------
-When specific data needs to be added to the error you can use
-``add_error_data()`` to add data to the non mutable ``ErrorCode`` instance::
+Using YAML Rules
+----------------
 
-	>>> from errors import ListErrors, add_error_data
-	>>> the_error = ListErrors.UNEXPECTED_404_RESPONSE
-	>>> add_error_data(
-		error=the_error,
-		error_data={'url_called': 'www.url.com'})
-	>>> the_error
-	ErrorCode(code='GD_RESP_0004', description='URL returned unexpected 404
-	response', error_data={'url_called': 'www.url.com'})
+For more complex rule sets, subclass ``RecordConvertor`` and point to a YAML file:
+
+.. code-block:: python
+
+    from record_convertor import RecordConvertor
+
+    class MyConvertor(RecordConvertor):
+        pass
+
+    convertor = MyConvertor(rule_source="/path/to/rules.yaml")
+    result = convertor.convert(input_record)
+
+The YAML file uses the same structure as the dict rules:
+
+.. code-block:: yaml
+
+    name: item.name
+    city: address.city
+    website:
+      $convert_website:
+        fieldname: item.url
+        actions:
+          - action_type: remove_params_from_url
+            action_value: item.url
 
 
-Check if an object is of (sub)class ErrorCode
----------------------------------------------
-When you want to check if a return value is either an error_code
-you can use ``is_error()``. This method checks if an object is of class ``ErrorCode`` or a subclass there of::
+Rule Types Overview
+-------------------
 
-	>>> from errors import ListErrors, is_error
-	>>> the_error = ListErrors.UNEXPECTED_404_RESPONSE
-	>>> is_error(the_error)
-	True
-	>>> is_error({'data': 'or_any_other_object')}
-	False
+Field Mapping
+^^^^^^^^^^^^^
+
+A string value maps an output key directly to an input field path:
+
+.. code-block:: python
+
+    {"output_key": "input.field.path"}
+
+
+Field Conversions (``$convert``)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Transform a field value in-place on the input record before it is mapped to output.
+See :doc:`field-convertors` for the full reference.
+
+.. code-block:: python
+
+    {
+        "$convert_price": {
+            "fieldname": "item.price_str",
+            "actions": [
+                {"action_type": "to_str", "action_value": "item.price_str"}
+            ]
+        },
+        "price": "item.price_str",
+    }
+
+
+Date Formatting (``$format_date``)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Convert date fields between formats. See :doc:`date-convertors`.
+
+.. code-block:: python
+
+    {
+        "$format_date_opened": {
+            "date_field": "opened_date",
+            "format": "DD-MM-YYYY",
+        },
+        "opened": "opened_date",
+    }
+
+
+Commands (``$``)
+^^^^^^^^^^^^^^^^
+
+Compute output values using command functions. See :doc:`commands`.
+
+.. code-block:: python
+
+    {
+        "location": {"$point": {"lat": "latitude", "lon": "longitude"}},
+        "full_name": {"$join": {"fields": ["first_name", "last_name"], "separator": " "}},
+    }
+
+
+Skip Rules (``$skip``)
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Conditionally skip the entire record. See :doc:`conditions`.
+
+.. code-block:: python
+
+    {
+        "$skip": {
+            "fieldname": "status",
+            "condition": {"equals": "inactive"},
+        }
+    }
+
+
+Dataclass Processing (``$dataclass``)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Run a record through a Pydantic model or dataclass. See :doc:`dataclass-processor`.
+
+.. code-block:: python
+
+    {
+        "$dataclass": {
+            "data_class_name": "MyModel",
+            "params": {"name": "item.name"},
+            "methods": [],
+        }
+    }
+
+
+Protocol-Based Customization
+-----------------------------
+
+The convertor uses protocols for dependency injection, allowing you to substitute
+custom implementations:
+
+.. code-block:: python
+
+    from record_convertor import RecordConvertorWithRulesDict
+    from record_convertor.field_convertors import BaseFieldConvertor
+
+    class MyFieldConvertor(BaseFieldConvertor):
+        def my_custom_action(self, action_value):
+            # custom conversion logic
+            self.set_field_value("transformed", self._field_name)
+
+    convertor = RecordConvertorWithRulesDict(
+        rule_dict=rules,
+        field_convertor=MyFieldConvertor,
+    )
+
+Available protocol injection points:
+
+- ``field_convertor`` — custom field conversion class (implements ``FieldConvertorProtocol``)
+- ``date_formatter`` — custom date formatting class (implements ``DateFormatProtocol``)
+- ``command_class`` — custom command processor class
+- ``data_classes`` — list of dataclass/Pydantic model types to register
