@@ -28,7 +28,7 @@ pytest tests/test_record_convertor/test_record_convertor.py
 pytest tests/test_record_convertor/test_record_convertor.py::test_name -v
 
 # Tox environments
-tox                    # Run tests across Python 3.10, 3.11, 3.12
+tox                    # Run tests across Python 3.12, 3.13, 3.14
 tox -e typecheck       # mypy type checking
 tox -e format          # ruff + isort formatting
 tox -e lint            # flake8 linting
@@ -75,6 +75,30 @@ A conversion rule set defines how each output field is derived from the input re
 - **JMESPath**: Used for nested field access in input records (e.g., `"item.brand.name"`).
 - **Recursive processing**: Handles nested dicts and lists within records.
 - **Type definitions**: `RulesDict`, `BaseRuleDict`, `FormatDateRuleDict`, `SkipRuleDict`, `DataClassRuleDict` in `package_settings/package_types.py`.
+
+## Documentation
+
+Sphinx-based docs live in `docs/` and are published to Read the Docs. RTD build config is in `.readthedocs.yaml`.
+
+```bash
+# Build docs locally
+cd docs && sphinx-build -b html . _build/html
+
+# Open in browser
+open docs/_build/html/index.html
+```
+
+### Documentation structure
+
+- `docs/index.rst` — Landing page with quick example
+- `docs/usage.rst` — Getting started, rule types overview, protocol customization
+- `docs/field-convertors.rst` — All `$convert` field conversion actions
+- `docs/commands.rst` — All `$` command processors
+- `docs/conditions.rst` — Condition system reference
+- `docs/date-convertors.rst` — Date format conversion reference
+- `docs/dataclass-processor.rst` — Dataclass/Pydantic model processing
+- `docs/api.rst` — Auto-generated API reference (autodoc)
+- `docs/contributing.rst`, `docs/authors.rst`, `docs/changelog.rst` — Include root-level rst files
 
 ## Dependencies
 
