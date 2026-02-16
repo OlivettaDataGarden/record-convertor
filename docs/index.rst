@@ -1,14 +1,13 @@
-=============
-Error Manager
-=============
+================
+Record Convertor
+================
 
+Rule-based record transformation for Python
+============================================
 
-Managing error codes throughout you project
-===========================================
-
-**Error-manager** is a simple library for Python to manage all your projects error codes.
-
-.. start-badges
+**record-convertor** is a library that converts input dicts into desired output formats
+using YAML or dict-based rule configurations. It normalizes records of the same data type
+from different sources into a single validated structure.
 
 .. list-table::
     :widths: 8 50
@@ -16,72 +15,67 @@ Managing error codes throughout you project
 
     * - docs
       - |docs|
-    * - tests
-      - |travis| |requires| |codecov|
     * - package
-      - |version| |supported-versions| |commits-since|
-  
-.. |docs| image:: https://readthedocs.org/projects/errors/badge/?style=flat
-    :target: https://errors.readthedocs.io/
+      - |version| |supported-versions|
+
+.. |docs| image:: https://readthedocs.org/projects/record-convertor/badge/?style=flat
+    :target: https://record-convertor.readthedocs.io/
     :alt: Documentation Status
 
-.. |travis| image:: https://api.travis-ci.com/MaartendeRuyter/errors.svg?branch=master
-    :alt: Travis-CI Build Status
-    :target: https://travis-ci.com/github/MaartendeRuyter/errors
-
-.. |requires| image:: https://requires.io/github/MaartendeRuyter/errors/requirements.svg?branch=master
-    :alt: Requirements Status
-    :target: https://requires.io/github/MaartendeRuyter/errors/requirements/?branch=master
-
-.. |codecov| image:: https://codecov.io/gh/MaartendeRuyter/errors/branch/master/graphs/badge.svg?branch=master
-    :alt: Coverage Status
-    :target: https://codecov.io/github/MaartendeRuyter/errors
-
-.. |version| image:: https://img.shields.io/pypi/v/error-manager.svg
+.. |version| image:: https://img.shields.io/pypi/v/record-convertor.svg
     :alt: PyPI Package latest release
-    :target: https://pypi.org/project/error-manager
+    :target: https://pypi.org/project/record-convertor
 
-.. |supported-versions| image:: https://img.shields.io/pypi/pyversions/error-manager.svg
+.. |supported-versions| image:: https://img.shields.io/pypi/pyversions/record-convertor.svg
     :alt: Supported versions
-    :target: https://pypi.org/project/error-manager
+    :target: https://pypi.org/project/record-convertor
 
-.. |commits-since| image:: https://img.shields.io/github/commits-since/MaartendeRuyter/errors/v0.1.0.svg
-    :alt: Commits since latest release
-    :target: https://github.com/MaartendeRuyter/errors/compare/v0.1.0...master
+Installation
+------------
 
+::
 
+    pip install record-convertor
 
-.. end-badges
+Quick Example
+-------------
 
+.. code-block:: python
 
+    from record_convertor import RecordConvertorWithRulesDict
 
--------------------
+    rules = {
+        "name": "item.name",
+        "brand": "item.brand.name",
+        "price": "item.price",
+    }
 
-**error-manager main use cases**::
+    convertor = RecordConvertorWithRulesDict(rule_dict=rules)
 
-    # retrieve customer defined ErrorCode object form ``ListErrors`` class
-    >>> from errors.error import ListErrors
-    >>> error = ListErrors.COULD_NOT_FIND_ERROR_CODE
-    >>> error
-    ErrorCode(code='ER_GETERROR_00001', description='Could not find requested 
-    error code', error_data=<class 'dict'>)
-    
-    # add custom error data to error message when you want to persist or log
-    # the error
-    >>> from errors.base import add_error_data   
-    >>> error_with_data = add_error_data(error, {'key': 'Example error data'})
-    >>> error_with_data 
-    ErrorCode(code='ER_GETERROR_00001', description='Could not find requested error code', error_data={'key': 'Example error data'})
-    
-see :doc:`usage section <usage>` on how to create and
-register custom error codes for your project
+    input_record = {
+        "item": {
+            "name": "Widget",
+            "brand": {"name": "Acme"},
+            "price": 9.99,
+        }
+    }
+
+    result = convertor.convert(input_record)
+    # result: {"name": "Widget", "brand": "Acme", "price": 9.99}
+
+Contents
+--------
 
 .. toctree::
    :maxdepth: 2
 
    usage
-   return_value
-   reference/index
+   field-convertors
+   commands
+   conditions
+   date-convertors
+   dataclass-processor
+   api
    contributing
    authors
    changelog

@@ -16,17 +16,23 @@ extensions = [
 ]
 source_suffix = ".rst"
 master_doc = "index"
-project = "errors"
-year = "2021"
+project = "record-convertor"
+year = "2024"
 author = "Maarten de Ruyter"
 copyright = "{0}, {1}".format(year, author)
-version = release = "1.2.4"
+version = release = "1.1.6"
 
 pygments_style = "trac"
 templates_path = ["."]
 extlinks = {
-    "issue": ("https://github.com/MaartendeRuyter/errors/issues/%s", "#"),
-    "pr": ("https://github.com/MaartendeRuyter/errors/pull/%s", "PR #"),
+    "issue": (
+        "https://github.com/OlivettaDataGarden/record-convertor/issues/%s",
+        "#%s",
+    ),
+    "pr": (
+        "https://github.com/OlivettaDataGarden/record-convertor/pull/%s",
+        "PR #%s",
+    ),
 }
 # on_rtd is whether we are on readthedocs.org
 on_rtd = os.environ.get("READTHEDOCS", None) == "True"
