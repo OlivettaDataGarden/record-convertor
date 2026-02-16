@@ -34,7 +34,9 @@ def test_add_data_from_dict_with_none_field_value():
 
 
 def test_add_data_from_dict_with_missing_action_field():
-    """When the action points to a nonexistent field, original dict is returned unchanged."""
+    """
+    When the action points to a nonexistent field, original dict is returned unchanged.
+    """
     result = convertor.convert_field(
         **deepcopy(PARAMS_ADD_DATA_FROM_DICT_MISSING_ACTION_FIELD)
     )

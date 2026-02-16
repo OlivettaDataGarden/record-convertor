@@ -168,7 +168,10 @@ def test_data_class_return_without_method():
 
 
 def test_asdict_with_non_dataclass_raises_type_error():
-    """test _asdict raises TypeError when passed a non-dataclass, non-Pydantic instance"""
+    """
+    test _asdict raises TypeError when passed a non-dataclass,
+    non-Pydantic instance
+    """
     from record_convertor.dataclass_processor import _asdict
 
     class RegularClass:

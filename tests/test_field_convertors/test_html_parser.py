@@ -1,6 +1,6 @@
 """Tests for the DataFromHTMLSnippet HTML parser."""
 
-from record_convertor.field_convertors.base_convertor.base_convertor_helpers.html_parser import (
+from record_convertor.field_convertors.base_convertor.base_convertor_helpers import (
     DataFromHTMLSnippet,
 )
 
@@ -53,7 +53,5 @@ def test_empty_string():
 def test_complex_html():
     """Complex HTML with multiple nesting levels extracts all text."""
     parser = DataFromHTMLSnippet()
-    result = parser.to_list(
-        "<div><h1>Title</h1><p>First <b>bold</b> text</p></div>"
-    )
+    result = parser.to_list("<div><h1>Title</h1><p>First <b>bold</b> text</p></div>")
     assert result == ["Title", "First", "bold", "text"]

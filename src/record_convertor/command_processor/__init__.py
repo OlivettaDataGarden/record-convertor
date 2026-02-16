@@ -307,9 +307,7 @@ class ProcessCommand:
             seperator = join_arguments.pop(0)[-1]
 
         try:
-            return seperator.join(
-                [join_value(key) for key in join_arguments]
-            ).strip()
+            return seperator.join([join_value(key) for key in join_arguments]).strip()
         except KeyError:
             return None
 
